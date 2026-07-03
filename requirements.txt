@@ -1,0 +1,6 @@
+streamlit
+pandas
+openpyxl
+msoffcrypto-tool
+psycopg2-binary
+Pillow
