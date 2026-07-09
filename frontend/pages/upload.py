@@ -64,6 +64,58 @@ def show_upload():
             )
 
             st.success("File uploaded successfully!")
+            st.write(f"**File ID:** {result['file_id']}")
+            st.write(f"**Rows Inserted:** {result['rows_inserted']}")
+
+            st.subheader("Upload Summary")
+            summary = result["summary"]
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.metric(
+                    "Rows Uploaded",
+                    summary["Rows Uploaded"]
+                )
+
+            with col2:
+                st.metric(
+                    "Unique PANs",
+                    summary["Unique PANs"]
+                )
+
+            with col3:
+                st.metric(
+                    "First-Time PANs",
+                    summary["First-Time PANs"]
+                )
+
+            col4, col5, col6 = st.columns(3)
+
+            with col4:
+                st.metric(
+                    "Repeat PANs",
+                    summary["Repeat PANs"]
+                )
+
+            with col5:
+                st.metric(
+                    "Historical Alerts",
+                    summary["Historical Alerts"]
+                )
+
+            with col6:
+                st.metric(
+                    "New Alerts",
+                    summary["New Alerts"]
+                )
+
+            col7, _ = st.columns([1, 5])
+
+            with col7:
+                st.metric(
+                    "Total Alerts",
+                    summary["Total Alerts"]
+                )
 
             st.divider()
 
@@ -82,8 +134,7 @@ def show_upload():
             #     unsafe_allow_html=True
             # )
 
-            st.write(f"**File ID:** {result['file_id']}")
-            st.write(f"**Rows Inserted:** {result['rows_inserted']}")
+            
 
 
         except Exception as e:
