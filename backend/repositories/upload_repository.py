@@ -133,6 +133,7 @@ def insert_alerts(
         df = df.copy()
 
         df.insert(0, "file_id", file_id)
+        # print(df[["file_id"]].head())
 
         # -----------------------------------
         # Convert DataFrame into list of tuples
@@ -152,6 +153,7 @@ def insert_alerts(
         VALUES %s
         """
 
+        # print(records[:3])
         execute_values(
             cursor,
             sql,
@@ -160,6 +162,49 @@ def insert_alerts(
         )
 
         return len(records)
+
+    finally:
+
+        cursor.close()
+
+
+def get_upload_summary(
+    connection: PGConnection,
+    file_id: int
+):
+    """
+    Returns the Upload Intelligence Report
+    for the uploaded file.
+    """
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT
+                alert_pan,
+                alert_name,
+                file_id,
+                fiu_alert_type,
+                report_year,
+                report_month,
+                report_fortnight
+            FROM vw_alert_summary
+            WHERE
+                alert_pan IS NOT NULL
+                AND file_id <= %s
+            ORDER BY
+                alert_pan,
+                report_year,
+                report_month,
+                report_fortnight
+            """,
+            (file_id,)
+        )
+
+        rows = cursor.fetchall()
+        return rows
 
     finally:
 

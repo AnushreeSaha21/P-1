@@ -69,7 +69,7 @@ CREATE TABLE fiu_alerts (
 
     alert_name               VARCHAR(255),
 
-    alert_pan                VARCHAR(20) NOT NULL,
+    alert_pan                VARCHAR(20),
 
     -------------------------------------------------------
     -- TRANSACTION DETAILS

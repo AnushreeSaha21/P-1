@@ -21,8 +21,11 @@ from backend.parser.cdsl_parser import parse_cdsl
 from backend.repositories.upload_repository import (
     file_exists,
     insert_uploaded_file,
-    insert_alerts
+    insert_alerts,
+    get_upload_summary
 )
+
+from backend.services.report_builder import build_upload_report
 
 from backend.utils.constants import (
     NSDL,
@@ -72,14 +75,41 @@ def upload_file(
         
         file_id = insert_uploaded_file(connection,metadata)
 
-        rows = insert_alerts(connection,parsed_df,file_id)
+        rows_inserted = insert_alerts(
+                        connection,
+                        parsed_df,
+                        file_id
+                    )
+
+        report_rows = get_upload_summary(
+                        connection,
+                        file_id
+                    )
+        
+        # print("Current file_id:", file_id)
+
+        # print("Unique file_ids in report:")
+
+        # print(sorted(set(row[2] for row in report_rows)))
+
+        summary, report_df = build_upload_report(
+                        report_rows,
+                        file_id
+                    )
+
 
         connection.commit()
 
         return {
             "success": True,
+
             "file_id": file_id,
-            "rows_inserted": rows
+
+            "rows_inserted": rows_inserted,
+
+            "summary": summary,
+
+            "report": report_df
         }
     
     except Exception:

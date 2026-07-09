@@ -1,4 +1,4 @@
-
+import pandas as pd
 def standardize_name(name):
     """
     Rahul kumar
@@ -45,12 +45,16 @@ def standardize_transaction_indicator(value):
     ->
     CR
     """
-
-    if value is None:
+    # Handle empty values from Excel/CSV
+    if pd.isna(value):
         return None
 
     value = str(value).strip().upper()
 
+    # Handle blank strings
+    if value == "":
+        return None
+    
     mapping = {
     "DR": "DR",
     "DB": "DR",          # NSDL abbreviation

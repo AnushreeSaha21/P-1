@@ -41,7 +41,7 @@ def read_excel(file_path: str, password: str | None = None) -> pd.DataFrame:
 
     extension = path.suffix.lower()
 
-    if extension not in [".xls", ".xlsx"]:
+    if extension not in [".xls", ".xlsx",".csv"]:
         raise UnsupportedFileError(
             f"Unsupported file type: {extension}"
         )
@@ -51,6 +51,8 @@ def read_excel(file_path: str, password: str | None = None) -> pd.DataFrame:
     # ------------------------------------
 
     if password is None:
+        if extension == ".csv":
+            return pd.read_csv(path)
         return pd.read_excel(path)
 
     # ------------------------------------

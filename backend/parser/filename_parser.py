@@ -31,7 +31,7 @@ def parse_filename(filename: str) -> dict:
     filename = os.path.splitext(filename)[0]
 
     if filename.lower().startswith("fiu"):
-        if "_" in filename:
+        if "_" == filename[3]:
             return _parse_nsdl(filename)
         else:
             return _parse_cdsl(filename)
@@ -56,7 +56,7 @@ def _parse_cdsl(filename: str) -> dict:
     pattern = (
         r"^fiu"
         r"(?P<fiu>[1-5])_"
-        r"(?P<transaction>[a-zA-Z0-9_]+)_"
+        r"(?P<transaction>[a-z_]+)_"
         r"(?P<date>\d{6})$"
     )
 

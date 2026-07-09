@@ -115,6 +115,8 @@ def parse_nsdl(df: pd.DataFrame, metadata: dict) -> pd.DataFrame:
 
     # Rename to canonical names
     df.rename(columns=COLUMN_MAPPING, inplace=True)
+    # print(df.columns.tolist())
+    # print(df[["isin_code"]].head())
 
     # ---------------------------------------------------------
     # Add Missing Database Columns

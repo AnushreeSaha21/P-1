@@ -25,7 +25,7 @@ def show_upload():
 
     uploaded_file = st.file_uploader(
         "Select FIU Excel File",
-        type=["xls", "xlsx"]
+        type=["xls", "xlsx","csv"]
     )
 
     password = st.text_input(
@@ -45,6 +45,7 @@ def show_upload():
             st.warning("Please select an Excel file.")
             return
 
+        temp_path = None
         try:
 
             temp_path = os.path.join(
@@ -64,8 +65,26 @@ def show_upload():
 
             st.success("File uploaded successfully!")
 
+            st.divider()
+
+            st.subheader("Upload Intelligence Report")
+
+            st.dataframe(
+                result["report"],
+                use_container_width=True
+            )
+
+            # st.markdown(
+            #     result["report"].to_html(
+            #     escape=False,
+            #     index=False
+            #     ),
+            #     unsafe_allow_html=True
+            # )
+
             st.write(f"**File ID:** {result['file_id']}")
             st.write(f"**Rows Inserted:** {result['rows_inserted']}")
+
 
         except Exception as e:
 
