@@ -28,6 +28,9 @@ def clean_pan(pan):
 
     pan = str(pan).strip().upper()
 
+    if pan == "":
+        return None
+
     return pan
 
 
