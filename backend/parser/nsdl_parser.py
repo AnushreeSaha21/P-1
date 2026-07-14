@@ -45,7 +45,7 @@ COLUMN_MAPPING = {
     "SOURCE DP ID": "source_dp_id",
     "SOURCE BNFC AC NO.": "source_client_id",
     "SOURCE FIRST HOLDER NAME": "source_name",
-    "SOURCE IST PAN": "source_pan",
+    "SOURCE I ST PAN": "source_pan",
     "NAME OF BANK OF SELLER": "source_bank_name",
     "NAME OF BRANCH OF SELLER": "source_branch_name",
     "ACCOUNT NO OF SELLER": "source_bank_account",
@@ -58,7 +58,7 @@ COLUMN_MAPPING = {
     "TARGET DP ID": "target_dp_id",
     "TARGET BNFC AC NO": "target_client_id",
     "TARGET FIRST HOLDER NAME": "target_name",
-    "TARGET IST PAN": "target_pan",
+    "TARGET I ST PAN": "target_pan",
     "NAME OF BANK OF PURCHASER": "target_bank_name",
     "NAME OF BRANCH OF PURCHASER": "target_branch_name",
     "ACCOUNT NO FOR PURCHASER": "target_bank_account",
@@ -201,30 +201,118 @@ def parse_nsdl(df: pd.DataFrame, metadata: dict) -> pd.DataFrame:
     # Derive Alert Account
     # ---------------------------------------------------------
 
+#     is_debit = df["transaction_indicator"] == DEBIT
+
+#     # Which side generated the alert
+#     df["alert_side"] = is_debit.map({
+#         True: SOURCE,
+#         False: TARGET
+#     })
+
+#     # Alert PAN
+#     # df["alert_pan"] = df["source_pan"].where(
+#     #     is_debit,
+#     #     df["target_pan"]
+#     # )
+
+#     df["alert_pan"] = None
+
+#     # Debit -> source
+#     df.loc[is_debit, "alert_pan"] = df.loc[
+#         is_debit,
+#         "source_pan"
+#     ]
+
+#     # Credit -> target
+#     df.loc[~is_debit, "alert_pan"] = df.loc[
+#         ~is_debit,
+#         "target_pan"
+#     ]
+
+#     # Fallback: if target missing, use source
+#     df["alert_pan"] = (
+#         df["alert_pan"]
+#         .fillna(df["source_pan"])
+#         .fillna(df["target_pan"])
+#     )
+
+#     # Alert Name
+#     df["alert_name"] = df["source_name"].where(
+#         is_debit,
+#         df["target_name"]
+#     )
+
+#     df["alert_name"] = (
+#     df["alert_name"]
+#     .fillna(df["source_name"])
+#     .fillna(df["target_name"])
+# )
+
     is_debit = df["transaction_indicator"] == DEBIT
 
-    # Which side generated the alert
-    df["alert_side"] = is_debit.map({
-        True: SOURCE,
-        False: TARGET
-    })
+    df["alert_pan"] = None
+    df["alert_side"] = None
 
-    # Alert PAN
-    df["alert_pan"] = df["source_pan"].where(
+    # Debit -> source
+    df.loc[is_debit, "alert_pan"] = df.loc[
         is_debit,
-        df["target_pan"]
+        "source_pan"
+    ]
+
+    df.loc[is_debit, "alert_side"] = SOURCE
+
+
+    # Non-debit -> target
+    df.loc[~is_debit, "alert_pan"] = df.loc[
+        ~is_debit,
+        "target_pan"
+    ]
+
+    df.loc[~is_debit, "alert_side"] = TARGET
+
+
+    # Fallback source
+    source_fallback = (
+        df["alert_pan"].isna()
+        & df["source_pan"].notna()
     )
 
-    # Alert Name
-    df["alert_name"] = df["source_name"].where(
-        is_debit,
-        df["target_name"]
+    df.loc[source_fallback, "alert_pan"] = df.loc[
+        source_fallback,
+        "source_pan"
+    ]
+
+    df.loc[source_fallback, "alert_side"] = SOURCE
+
+
+    # Fallback target
+    target_fallback = (
+        df["alert_pan"].isna()
+        & df["target_pan"].notna()
     )
+
+    df.loc[target_fallback, "alert_pan"] = df.loc[
+        target_fallback,
+        "target_pan"
+    ]
+
+    df.loc[target_fallback, "alert_side"] = TARGET
 
     # Alert Client ID
     df["alert_client_id"] = df["source_client_id"].where(
-        is_debit,
-        df["target_client_id"]
+            is_debit,
+            df["target_client_id"]
+        )
+    
+    df["alert_name"] = df["source_name"].where(
+    is_debit,
+    df["target_name"]
+)
+
+    df["alert_name"] = (
+        df["alert_name"]
+        .fillna(df["source_name"])
+        .fillna(df["target_name"])
     )
 
     # ---------------------------------------------------------
@@ -233,6 +321,20 @@ def parse_nsdl(df: pd.DataFrame, metadata: dict) -> pd.DataFrame:
 
     df = df[FIU_ALERT_COLUMNS]
 
+    print("NSDL alert PAN null count:")
+    print(df["alert_pan"].isna().sum())
+
+    print("Total rows:")
+    print(len(df))
+
+    print("Transaction indicators:")
+    print(df["transaction_indicator"].value_counts(dropna=False))
+
+    print(df[[
+        "source_pan",
+        "target_pan",
+        "transaction_indicator",
+        "alert_pan"
+    ]].head(10))
 
     return df
-

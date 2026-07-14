@@ -85,12 +85,18 @@ def upload_file(
                         connection,
                         file_id
                     )
-        
-        # print("Current file_id:", file_id)
 
-        # print("Unique file_ids in report:")
+        # print("Total report rows:", len(report_rows))
 
-        # print(sorted(set(row[2] for row in report_rows)))
+        # print(
+        #     "File IDs returned:",
+        #     sorted(set(row[2] for row in report_rows))
+        # )
+
+        # print(
+        #     "Rows with current file:",
+        #     len([row for row in report_rows if row[2] == file_id])
+        # )
 
         summary, report_df = build_upload_report(
                         report_rows,
@@ -109,7 +115,9 @@ def upload_file(
 
             "summary": summary,
 
-            "report": report_df
+            "report": report_df,
+
+            "uploaded_data": parsed_df
         }
     
     except Exception:

@@ -10,9 +10,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 
 from pages.upload import show_upload
-from pages.upload_history import show_upload_history
-from pages.search import show_search
-from pages.analytics import show_analytics
+from pages.city import show_city
+
 
 from PIL import Image
 
@@ -41,9 +40,8 @@ page = st.sidebar.radio(
     "Navigation",
     [
         "Upload",
-        "Upload History",
-        "Search",
-        "Analytics"
+        "City",
+        
     ]
 )
 
@@ -55,14 +53,9 @@ page = st.sidebar.radio(
 if page == "Upload":
     show_upload()
 
-elif page == "Upload History":
-    show_upload_history()
 
-elif page == "Search":
-    show_search()
-
-elif page == "Analytics":
-    show_analytics()
+elif page == "City":
+    show_city()
 
 
 

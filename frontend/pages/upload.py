@@ -126,16 +126,62 @@ def show_upload():
                 use_container_width=True
             )
 
-            # st.markdown(
-            #     result["report"].to_html(
-            #     escape=False,
-            #     index=False
-            #     ),
-            #     unsafe_allow_html=True
-            # )
+            st.divider()
+
+            st.subheader("Uploaded Transactions (Current File)")
+
+            display_df = result["uploaded_data"].copy()
+
+            display_columns = [
+
+                "source_pan",
+                "source_name",
+
+                "target_pan",
+                "target_name",
+
+                "transaction_indicator",
+                "transaction_type",
+
+                "isin_code",
+                "isin_name",
+
+                "quantity",
+
+                "valuation"
+
+            ]
+
+            display_df = display_df[display_columns]
+
+
+            display_df = display_df.rename(columns={
+
+                "source_pan": "Source PAN",
+                "source_name": "Source Name",
+
+                "target_pan": "Target PAN",
+                "target_name": "Target Name",
+
+                "transaction_indicator": "Txn",
+
+                "transaction_type": "Transaction Type",
+
+                "isin_code": "ISIN Code",
+
+                "isin_name": "Security",
+
+                "quantity": "Quantity",
+
+                "valuation": "Valuation"
+
+            })
 
             
-
+            st.dataframe(
+                display_df,
+                width="stretch"
+            )
 
         except Exception as e:
 

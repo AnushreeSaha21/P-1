@@ -37,6 +37,7 @@ def build_upload_report(
     """
 
     columns = [
+    
     "alert_pan",
     "alert_name",
     "file_id",
@@ -48,7 +49,15 @@ def build_upload_report(
 
     df = pd.DataFrame(rows, columns=columns)
     if df.empty:
-        return {}, pd.DataFrame()
+        return {
+            "Rows Uploaded": 0,
+            "Unique PANs": 0,
+            "First-Time PANs": 0,
+            "Repeat PANs": 0,
+            "Historical Alerts": 0,
+            "New Alerts": 0,
+            "Total Alerts": 0,
+        }, pd.DataFrame()
     
     report = []
 
@@ -95,9 +104,6 @@ def build_upload_report(
         else:
             repeat_pans += 1
 
-        # previous_alerts = "<br>".join(historical.apply(format_alert,axis=1))
-
-        # new_alerts = "<br>".join(new.apply(format_alert,axis=1))
 
         previous_list = [
             format_alert(row)
@@ -117,27 +123,11 @@ def build_upload_report(
 
         latest_alert = format_alert(group.iloc[-1])
 
-        # report.append({
-
-        #     "PAN": pan,
-
-        #     "Name": group.iloc[0]["alert_name"],
-
-        #     "Historical": historical_count,
-
-        #     "New": new_count,
-
-        #     "Total": total_count,
-
-        #     "Previous Alerts": previous_alerts,
-
-        #     "Newly Uploaded Alerts": new_alerts,
-
-        #     "Latest Alert": latest_alert
-
-        # })
-
+        
+        
         for i in range(max_rows):
+
+            
 
             report.append({
 
@@ -172,33 +162,6 @@ def build_upload_report(
 
     report_df = pd.DataFrame(report)
 
-        # summary = {}
-
-        # summary["Rows Uploaded"] = len(
-        #     df[df["file_id"] == current_file_id]
-        # )
-
-        # summary["Unique PANs"] = len(report_df)
-
-        # summary["First-Time PANs"] = (
-        #     report_df["Historical"] == 0
-        # ).sum()
-
-        # summary["Repeat PANs"] = (
-        #     report_df["Historical"] > 0
-        # ).sum()
-
-        # summary["Historical Alerts"] = report_df[
-        #     "Historical"
-        # ].sum()
-
-        # summary["New Alerts"] = report_df[
-        #     "New"
-        # ].sum()
-
-        # summary["Total Alerts"] = report_df[
-        #     "Total"
-        # ].sum()
 
     summary = {
 
