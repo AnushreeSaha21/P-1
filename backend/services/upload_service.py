@@ -25,7 +25,8 @@ from backend.repositories.upload_repository import (
     get_upload_summary
 )
 
-from backend.services.report_builder import build_upload_report
+# from backend.services.report_builder import build_upload_report
+from backend.services.pan_history_report import build_pan_history_report
 
 from backend.utils.constants import (
     NSDL,
@@ -98,10 +99,15 @@ def upload_file(
         #     len([row for row in report_rows if row[2] == file_id])
         # )
 
-        summary, report_df = build_upload_report(
-                        report_rows,
-                        file_id
-                    )
+        # summary, report_df = build_upload_report(
+        #                 report_rows,
+        #                 file_id
+        #             )
+
+        summary, report_df = build_pan_history_report(
+            report_rows,
+            file_id
+        )
 
 
         connection.commit()

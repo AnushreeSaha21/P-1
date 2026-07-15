@@ -180,28 +180,48 @@ def get_upload_summary(
 
     try:
 
+        # cursor.execute(
+        #     """
+        #     SELECT
+        #         alert_pan,
+        #         alert_name,
+        #         file_id,
+        #         fiu_alert_type,
+        #         report_year,
+        #         report_month,
+        #         report_fortnight
+        #     FROM vw_alert_summary
+        #     WHERE
+        #         alert_pan IS NOT NULL
+        #         AND file_id <= %s
+        #     ORDER BY
+        #         alert_pan,
+        #         report_year,
+        #         report_month,
+        #         report_fortnight
+        #     """,
+        #     (file_id,)
+        # )
         cursor.execute(
-            """
-            SELECT
-                alert_pan,
-                alert_name,
-                file_id,
-                fiu_alert_type,
-                report_year,
-                report_month,
-                report_fortnight
-            FROM vw_alert_summary
-            WHERE
-                alert_pan IS NOT NULL
-                AND file_id <= %s
-            ORDER BY
-                alert_pan,
-                report_year,
-                report_month,
-                report_fortnight
-            """,
-            (file_id,)
-        )
+                    """
+                SELECT
+                    source_pan,
+                    target_pan,
+                    file_id,
+                    fiu_alert_type,
+                    report_year,
+                    report_month,
+                    report_fortnight
+                FROM vw_alert_summary
+                WHERE
+                    file_id <= %s
+                ORDER BY
+                    report_year,
+                    report_month,
+                    report_fortnight
+                """,
+                    (file_id,)
+                )
 
         rows = cursor.fetchall()
         return rows

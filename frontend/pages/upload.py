@@ -73,8 +73,8 @@ def show_upload():
 
             with col1:
                 st.metric(
-                    "Rows Uploaded",
-                    summary["Rows Uploaded"]
+                    "Transactions Uploaded",
+                    summary["Transactions Uploaded"]
                 )
 
             with col2:
