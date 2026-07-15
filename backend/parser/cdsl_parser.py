@@ -266,6 +266,18 @@ def _parse_cdsl_fiu2(df: pd.DataFrame, metadata: dict) -> pd.DataFrame:
         if col in df.columns:
             df[col] = df[col].apply(clean_numeric)
 
+    df["source_client_id"] = df["customer_client_id"]
+    df["source_name"] = df["customer_name"]
+    df["source_pan"] = df["customer_pan"]
+
+    df["source_bank_name"] = df["customer_bank_name"]
+    df["source_ifsc"] = df["customer_ifsc"]
+    df["source_bank_account"] = df["customer_bank_account"]
+
+    df["source_address"] = df["customer_address"]
+    df["source_city"] = df["customer_city"]
+    df["source_pincode"] = df["customer_pincode"]
+
 
     df["alert_client_id"] = df["customer_client_id"]
     df["alert_name"] = df["customer_name"]

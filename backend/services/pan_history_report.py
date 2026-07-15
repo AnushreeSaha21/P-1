@@ -156,9 +156,6 @@ def build_pan_history_report(
             pan_df["pan"] == pan
         ]
 
-#  =======================================================================================================
-
-
         group = group.sort_values(
                 by=[
                         "report_year",

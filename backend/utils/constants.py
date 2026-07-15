@@ -3,7 +3,7 @@ CDSL = "CDSL"
 NSDL = "NSDL"
 
 # Transaction Indicators
-DEBIT = "DB"
+DEBIT = "DR"
 CREDIT = "CR"
 
 # FIU Alert Types
