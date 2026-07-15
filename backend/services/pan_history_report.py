@@ -122,7 +122,9 @@ def build_pan_history_report(
     )
 
     pan_df = pan_df[
-        pan_df["pan"] != ""
+        ~pan_df["pan"].str.lower().isin(
+            ["", "nan", "none"]
+        )
     ]
 
     new_df = (
