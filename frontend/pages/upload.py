@@ -67,7 +67,8 @@ def show_upload():
             st.write(f"**File ID:** {result['file_id']}")
             st.write(f"**Rows Inserted:** {result['rows_inserted']}")
 
-            st.subheader("Upload Summary")
+            st.subheader("PAN History Report")
+            
             summary = result["summary"]
             col1, col2, col3 = st.columns(3)
 
@@ -119,12 +120,62 @@ def show_upload():
 
             st.divider()
 
-            st.subheader("Upload Intelligence Report")
+            st.subheader("PAN History Details")
 
             st.dataframe(
                 result["report"],
                 use_container_width=True
             )
+
+            st.divider()
+
+            st.subheader("ISIN History Report")
+
+            summary = result["isin_summary"]
+
+            col1, col2, col3, col4 = st.columns(4)
+
+            col1.metric(
+                "Transactions Uploaded",
+                summary["Transactions Uploaded"]
+            )
+
+            col2.metric(
+                "Unique ISINs",
+                summary["Unique ISINs"]
+            )
+
+            col3.metric(
+                "First-Time ISINs",
+                summary["First-Time ISINs"]
+            )
+
+            col4.metric(
+                "Repeat ISINs",
+                summary["Repeat ISINs"]
+            )
+
+            col5, col6, col7 = st.columns(3)
+
+            col5.metric(
+                "Historical Alerts",
+                summary["Historical Alerts"]
+            )
+
+            col6.metric(
+                "New Alerts",
+                summary["New Alerts"]
+            )
+
+            col7.metric(
+                "Total Alerts",
+                summary["Total Alerts"]
+            )
+
+            st.dataframe(
+                result["isin_report"],
+                width="stretch"
+            )       
 
             st.divider()
 

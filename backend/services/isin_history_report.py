@@ -1,7 +1,7 @@
 """
-pan_history_report.py
+isin_history_report.py
 
-Builds PAN-wise history report from uploaded FIU files.
+Builds ISIN-wise history report from uploaded FIU files.
 """
 
 import pandas as pd
@@ -41,16 +41,14 @@ def build_alert_list(df):
 
     return alerts
 
-def build_pan_history_report(
+def build_isin_history_report(
     rows,
     current_file_id
 ):
     columns = [
 
-    "source_pan",
-    "source_name",
-    "target_pan",
-    "target_name",
+    "isin_code",
+    "isin_name",
 
     "file_id",
 
@@ -62,116 +60,66 @@ def build_pan_history_report(
 ]
 
     df = pd.DataFrame(rows, columns=columns)
-
-    print(df.head())
-    print(df.dtypes)
-
     if df.empty:
         return {
             "Transactions Uploaded": 0,
-            "Unique PANs": 0,
-            "First-Time PANs": 0,
-            "Repeat PANs": 0,
+            "Unique ISINs": 0,
+            "First-Time ISINs": 0,
+            "Repeat ISINs": 0,
             "Historical Alerts": 0,
             "New Alerts": 0,
             "Total Alerts": 0,
         }, pd.DataFrame()
-    
-    source_df = df[
-        [
-            "source_pan",
-            "source_name",
-            "file_id",
-            "fiu_alert_type",
-            "report_year",
-            "report_month",
-            "report_fortnight"
-        ]
-    ].rename(
-        columns={
-            "source_pan": "pan",
-            "source_name": "name"
-        }
-    )
 
-    target_df = df[
-        [
-            "target_pan",
-            "target_name",
-            "file_id",
-            "fiu_alert_type",
-            "report_year",
-            "report_month",
-            "report_fortnight"
-        ]
-    ].rename(
-        columns={
-            "target_pan": "pan",
-            "target_name":"name"
-        }
-    )
+    df = df.dropna(subset=["isin_code"])
 
-    pan_df = pd.concat(
-        [
-            source_df,
-            target_df
-        ],
-        ignore_index=True
-    )
-    
-
-    pan_df = pan_df.dropna(
-        subset=["pan"]
-    )
-
-    pan_df["pan"] = (
-        pan_df["pan"]
+    df["isin_code"] = (
+        df["isin_code"]
         .astype(str)
         .str.strip()
     )
 
-    pan_df = pan_df[
-        ~pan_df["pan"].str.lower().isin(
+    df = df[
+        ~df["isin_code"].str.lower().isin(
             ["", "nan", "none"]
         )
     ]
 
     new_df = (
-        pan_df[
-            pan_df["file_id"] == current_file_id
+        df[
+            df["file_id"] == current_file_id
         ]
-        .drop_duplicates(subset=["pan"])
+        .drop_duplicates(subset=["isin_code"])
     )
 
     rows_uploaded = len(
         df[df["file_id"] == current_file_id]
     )
 
-    unique_pans = len(
-        new_df["pan"].unique()
+    unique_isins = len(
+        new_df["isin_code"].unique()
     )
 
     report = []
 
-    first_time_pans = 0
-    repeat_pans = 0
-
     historical_alerts = 0
+    first_time_isins = 0
+    repeat_isins = 0
     new_alerts_total = 0
     total_alerts = 0
 
-    for pan in new_df["pan"]:
-        group = pan_df[
-            pan_df["pan"] == pan
+    for isin in new_df["isin_code"]:
+        group = df[
+            df["isin_code"] == isin
         ]
 
         valid_names = group[
-            group["name"].notna()
-            & (group["name"].str.strip() != "")
+            group["isin_name"].notna()
+            & (group["isin_name"].str.strip() != "")
         ]
 
-        name = (
-            valid_names.iloc[0]["name"]
+        security = (
+            valid_names.iloc[0]["isin_name"]
             if not valid_names.empty
             else ""
         )
@@ -199,9 +147,9 @@ def build_pan_history_report(
         total_alerts += total_count
 
         if historical_count == 0:
-            first_time_pans += 1
+            first_time_isins += 1
         else:
-            repeat_pans += 1
+            repeat_isins += 1
 
 
         previous_list = build_alert_list(historical)
@@ -223,9 +171,9 @@ def build_pan_history_report(
 
             report.append({
 
-                    "PAN": pan if i == 0 else "",
+                    "ISIN Code": isin if i == 0 else "",
 
-                    "Name": name if i == 0 else "",
+                    "Security": security if i == 0 else "",
 
                     "Total Alerts": total_count if i == 0 else "",
 
@@ -253,17 +201,16 @@ def build_pan_history_report(
 
 
     report_df = pd.DataFrame(report)
-            
-
+           
     summary = {
 
             "Transactions Uploaded": rows_uploaded,
 
-            "Unique PANs": unique_pans,
+            "Unique ISINs": unique_isins,
 
-            "First-Time PANs": first_time_pans,
+            "First-Time ISINs": first_time_isins,
 
-            "Repeat PANs": repeat_pans,
+            "Repeat ISINs": repeat_isins,
 
             "Historical Alerts": historical_alerts,
 

@@ -206,7 +206,9 @@ def get_upload_summary(
                     """
                 SELECT
                     source_pan,
+                    source_name,
                     target_pan,
+                    target_name,
                     file_id,
                     fiu_alert_type,
                     report_year,
@@ -232,3 +234,42 @@ def get_upload_summary(
 
 
 
+def get_isin_upload_summary(
+    connection: PGConnection,
+    file_id: int
+):
+    """
+    Returns the Upload Intelligence Report
+    for the uploaded file.
+    """
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+                    """
+                SELECT
+                    isin_code,
+                    isin_name,
+                    file_id,
+                    fiu_alert_type,
+                    report_year,
+                    report_month,
+                    report_fortnight
+                FROM vw_alert_summary
+                WHERE
+                    file_id <= %s
+                ORDER BY
+                    report_year,
+                    report_month,
+                    report_fortnight
+                """,
+                    (file_id,)
+                )
+
+        rows = cursor.fetchall()
+        return rows
+
+    finally:
+
+        cursor.close()

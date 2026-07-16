@@ -22,11 +22,16 @@ from backend.repositories.upload_repository import (
     file_exists,
     insert_uploaded_file,
     insert_alerts,
-    get_upload_summary
+    get_upload_summary,
+    get_isin_upload_summary
 )
 
 # from backend.services.report_builder import build_upload_report
 from backend.services.pan_history_report import build_pan_history_report
+
+from backend.services.isin_history_report import (
+    build_isin_history_report
+)
 
 from backend.utils.constants import (
     NSDL,
@@ -81,11 +86,13 @@ def upload_file(
                         parsed_df,
                         file_id
                     )
-
+        # PAN History Report
         report_rows = get_upload_summary(
                         connection,
                         file_id
                     )
+        
+        print(report_rows[0])
 
         # print("Total report rows:", len(report_rows))
 
@@ -108,7 +115,19 @@ def upload_file(
             report_rows,
             file_id
         )
+        # ISIN History Report
+        isin_rows = get_isin_upload_summary(
+            connection,
+            file_id
+        )
 
+        isin_summary, isin_report = (
+            build_isin_history_report(
+                isin_rows,
+                file_id
+            )
+        )
+        
 
         connection.commit()
 
@@ -122,6 +141,10 @@ def upload_file(
             "summary": summary,
 
             "report": report_df,
+
+            "isin_summary": isin_summary,
+
+            "isin_report": isin_report,
 
             "uploaded_data": parsed_df
         }
