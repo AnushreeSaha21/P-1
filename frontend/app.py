@@ -9,8 +9,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 
 
-from pages.upload import show_upload
-from pages.city import show_city
+from ui.upload import show_upload
+from ui.city import show_city
+from ui.database import show_database
 
 
 from PIL import Image
@@ -37,10 +38,11 @@ st.set_page_config(
 st.sidebar.title("FIU INDIA Depository Analytics")
 
 page = st.sidebar.radio(
-    "Navigation",
+    "Menu",
     [
         "Upload",
         "City",
+        "Database"
         
     ]
 )
@@ -56,6 +58,10 @@ if page == "Upload":
 
 elif page == "City":
     show_city()
+
+elif page == "Database":
+    show_database()
+
 
 
 
