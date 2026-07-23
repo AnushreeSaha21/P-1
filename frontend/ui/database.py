@@ -1,9 +1,44 @@
 import streamlit as st
 import pandas as pd
-
+from st_aggrid import AgGrid, GridOptionsBuilder
 from backend.services.database_service import (
     browse_database
 )
+
+
+
+def show_grid(df):
+
+    gb = GridOptionsBuilder.from_dataframe(df)
+
+    gb.configure_default_column(
+        sortable=True,
+        filter=True,
+        resizable=True
+    )
+
+    # Wrap only the FIU Alerts column if it exists
+    if "FIU Alerts" in df.columns:
+        gb.configure_column(
+            "FIU Alerts",
+            wrapText=True,
+            autoHeight=True,
+            width=500,
+            cellStyle={
+                "white-space": "normal",
+                "line-height": "20px"
+            }
+        )
+
+    grid_options = gb.build()
+
+    AgGrid(
+        df,
+        gridOptions=grid_options,
+        fit_columns_on_grid_load=True,
+        allow_unsafe_jscode=True,
+        height=500
+    )
 
 def show_database():
 
@@ -249,55 +284,85 @@ def show_database():
                 result["records"],
                 columns=columns
             )
-
-        st.divider()
-
-        st.metric(
-                "Total Records",
-                result["total_records"]
-            )
         
-        start = (st.session_state.page - 1) * result["page_size"] + 1
-        end = min(
-        st.session_state.page * result["page_size"],
-        result["total_records"]
+        pan_df = result["pan_report"]
+
+        isin_df = result["isin_report"]
+
+        tab1, tab2, tab3 = st.tabs(
+            [
+                "📋 Transactions",
+                "👤 PAN History",
+                "📄 ISIN History"
+            ]
         )
 
-        st.caption(
-            f"Showing records {start:,}–{end:,} of {result['total_records']:,}"
-        )
+        # st.divider()
 
-        st.dataframe(
-                df,
-                use_container_width=True
+        with tab1:
+            st.subheader("📋 Transactions")
+            st.metric(
+                    "Total Records",
+                    result["total_records"]
+                )
+            
+            start = (st.session_state.page - 1) * result["page_size"] + 1
+            end = min(
+            st.session_state.page * result["page_size"],
+            result["total_records"]
             )
 
-        col1, col2, col3 = st.columns([1, 2, 1])
-
-        total_pages = max(
-            1,
-            (result["total_records"] + result["page_size"] - 1)
-            // result["page_size"]
-        )
-
-        with col1:
-            if st.button(
-                "⬅ Previous",
-                disabled=st.session_state.page == 1
-            ):
-                st.session_state.page -= 1
-                st.rerun()
-
-        with col2:
-            st.markdown(
-                f"<div style='text-align:center;'>Page {st.session_state.page} of {total_pages}</div>",
-                unsafe_allow_html=True,
+            st.caption(
+                f"Showing records {start:,}–{end:,} of {result['total_records']:,}"
             )
 
-        with col3:
-            if st.button(
-                "Next ➡",
-                disabled=st.session_state.page >= total_pages
-            ):
-                st.session_state.page += 1
-                st.rerun()
+            st.dataframe(
+                    df,
+                    use_container_width=True
+                )
+
+            col1, col2, col3 = st.columns([1, 2, 1])
+
+            total_pages = max(
+                1,
+                (result["total_records"] + result["page_size"] - 1)
+                // result["page_size"]
+            )
+
+            with col1:
+                if st.button(
+                    "⬅ Previous",
+                    disabled=st.session_state.page == 1
+                ):
+                    st.session_state.page -= 1
+                    st.rerun()
+
+            with col2:
+                st.markdown(
+                    f"<div style='text-align:center;'>Page {st.session_state.page} of {total_pages}</div>",
+                    unsafe_allow_html=True,
+                )
+
+            with col3:
+                if st.button(
+                    "Next ➡",
+                    disabled=st.session_state.page >= total_pages
+                ):
+                    st.session_state.page += 1
+                    st.rerun()
+
+        # st.divider()
+
+
+
+        
+        with tab2:
+            st.subheader("👤 PAN History")
+            show_grid(pan_df)
+        # st.divider()
+
+        
+
+        with tab3:
+            st.subheader("📄 ISIN History")
+            show_grid(isin_df)

@@ -13,6 +13,20 @@ from backend.repositories.database_repository import (
     get_database_count
 )
 
+from backend.repositories.database_repository import (
+    get_pan_database_report_rows
+)
+
+from backend.services.pan_database_report import (
+    build_pan_database_report
+)
+
+
+from backend.services.isin_database_report import (
+    build_isin_database_report
+)
+
+
 def browse_database(
 
     page=1,
@@ -73,12 +87,13 @@ def browse_database(
                 isin_name=isin_name
             )
 
-            records = get_database_records(
+            transaction_rows = get_database_records(
 
                 connection,
 
                 page=page,
                 page_size=page_size,
+                paginate=True,
 
                 report_year=report_year,
                 report_month=report_month,
@@ -103,6 +118,43 @@ def browse_database(
                 isin_name=isin_name
             )
 
+            history_rows = get_database_records(
+
+                connection,
+
+                paginate=False,
+
+                report_year=report_year,
+                report_month=report_month,
+                report_fortnight=report_fortnight,
+
+                fiu_alert_type=fiu_alert_type,
+                source_system=source_system,
+
+                source_dp_id=source_dp_id,
+                source_client_id=source_client_id,
+                source_pan=source_pan,
+                source_name=source_name,
+
+                target_dp_id=target_dp_id,
+                target_client_id=target_client_id,
+                target_pan=target_pan,
+                target_name=target_name,
+
+                transaction_indicator=transaction_indicator,
+
+                isin_code=isin_code,
+                isin_name=isin_name
+            )
+
+            pan_report = build_pan_database_report(
+                history_rows
+            )
+
+            isin_report = build_isin_database_report(
+                history_rows
+            )
+            
             return {
 
                 "total_records": total_records,
@@ -111,7 +163,11 @@ def browse_database(
 
                 "page_size": page_size,
 
-                "records": records
+                "records": transaction_rows,
+
+                "pan_report": pan_report,
+
+                "isin_report": isin_report
 
             }
 
