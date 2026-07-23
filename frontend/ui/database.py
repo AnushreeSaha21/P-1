@@ -23,7 +23,8 @@ def show_grid(df):
             "FIU Alerts",
             wrapText=True,
             autoHeight=True,
-            width=500,
+            flex=1,
+            minWidth=600,
             cellStyle={
                 "white-space": "normal",
                 "line-height": "20px"
@@ -35,7 +36,7 @@ def show_grid(df):
     AgGrid(
         df,
         gridOptions=grid_options,
-        fit_columns_on_grid_load=True,
+        fit_columns_on_grid_load=False,
         allow_unsafe_jscode=True,
         height=500
     )
