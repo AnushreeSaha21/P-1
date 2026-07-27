@@ -59,7 +59,8 @@ def standardize_transaction_indicator(value):
     "DR": "DR",
     "DB": "DR",          # NSDL abbreviation
     "DEBIT": "DR",
-
+    "D": "DR",
+    "C": "CR",
     "CR": "CR",
     "CRD": "CR",         # Optional, if encountered
     "CREDIT": "CR"
