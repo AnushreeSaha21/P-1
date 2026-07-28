@@ -3,28 +3,18 @@ database_service.py
 
 Coordinates FIU database browsing.
 """
-
+import pandas as pd
 from backend.database.db_connection import (
     get_connection
 )
 
 from backend.repositories.database_repository import (
     get_database_records,
-    get_database_count
+    get_database_count,
+    get_pan_database_report,
+    get_isin_database_report
 )
 
-from backend.repositories.database_repository import (
-    get_pan_database_report_rows
-)
-
-from backend.services.pan_database_report import (
-    build_pan_database_report
-)
-
-
-from backend.services.isin_database_report import (
-    build_isin_database_report
-)
 
 
 def browse_database(
@@ -88,7 +78,6 @@ def browse_database(
             )
 
             transaction_rows = get_database_records(
-
                 connection,
 
                 page=page,
@@ -118,11 +107,14 @@ def browse_database(
                 isin_name=isin_name
             )
 
-            history_rows = get_database_records(
+
+            # ---------------------------------------------------------
+            # PAN REPORT - PostgreSQL aggregation
+            # ---------------------------------------------------------
+
+            pan_rows = get_pan_database_report(
 
                 connection,
-
-                paginate=False,
 
                 report_year=report_year,
                 report_month=report_month,
@@ -147,12 +139,57 @@ def browse_database(
                 isin_name=isin_name
             )
 
-            pan_report = build_pan_database_report(
-                history_rows
+            pan_report = pd.DataFrame(
+                pan_rows,
+                columns=[
+                    "PAN",
+                    "Name",
+                    "Total Alerts",
+                    "FIU Alerts"
+                ]
             )
 
-            isin_report = build_isin_database_report(
-                history_rows
+
+          
+            # ---------------------------------------------------------
+            # ISIN REPORT - PostgreSQL aggregation
+            # ---------------------------------------------------------
+
+            isin_rows = get_isin_database_report(
+
+                connection,
+
+                report_year=report_year,
+                report_month=report_month,
+                report_fortnight=report_fortnight,
+
+                fiu_alert_type=fiu_alert_type,
+                source_system=source_system,
+
+                source_dp_id=source_dp_id,
+                source_client_id=source_client_id,
+                source_pan=source_pan,
+                source_name=source_name,
+
+                target_dp_id=target_dp_id,
+                target_client_id=target_client_id,
+                target_pan=target_pan,
+                target_name=target_name,
+
+                transaction_indicator=transaction_indicator,
+
+                isin_code=isin_code,
+                isin_name=isin_name
+            )
+
+            isin_report = pd.DataFrame(
+                isin_rows,
+                columns=[
+                    "ISIN",
+                    "Security",
+                    "Total Alerts",
+                    "FIU Alerts"
+                ]
             )
             
             return {

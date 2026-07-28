@@ -119,4 +119,6 @@ backend/database/exampleconfig.py
 fiu1_drcr_sum_150625.xlsx
 idk.txt
 
+backend/services/REMOVE_isin_database_report.py
+backend/services/REMOVE_pan_database_report.py
 ss/
