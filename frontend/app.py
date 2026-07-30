@@ -8,10 +8,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 
-
 from ui.upload import show_upload
-from ui.city import show_city
+from frontend.ui.analytics import show_analytics
 from ui.database import show_database
+from ui.user_guide import show_user_guide
 
 
 from PIL import Image
@@ -41,8 +41,9 @@ page = st.sidebar.radio(
     "Menu",
     [
         "Upload",
-        "City",
-        "Database"
+        "Analytics",
+        "Database",
+        "About"
         
     ]
 )
@@ -56,11 +57,14 @@ if page == "Upload":
     show_upload()
 
 
-elif page == "City":
-    show_city()
+elif page == "Analytics":
+    show_analytics()
 
 elif page == "Database":
     show_database()
+
+elif page == "About":
+    show_user_guide()
 
 
 
