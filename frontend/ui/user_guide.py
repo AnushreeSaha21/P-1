@@ -126,37 +126,36 @@ def show_user_guide():
 
     st.header("🚨 FIU Alert Types")
 
+    st.markdown("###  Alert type-1")
 
-
-    alerts = pd.DataFrame({
-
-        "Alert Type":[
-            "FIU-1",
-            "FIU-2",
-            "FIU-3",
-            "FIU-4",
-            "FIU-5"
-        ],
-
-        "Description":[
-
-            "Details of debit and credit transactions due to off-market or inter- depository transfer transactions, having value of Rs. 10 Lakh and above in an amount in an ISIN, in a single transaction or series of transactions executed during the fortnight",
-
-            "Details of debit and credit transactions due to demat,remat and pledge involving 50000 or more shares, in an account in an ISIN, in a single transaction or series of transactions executed during the fortnight.",
-
-            "Details of debit and credit transactions involving 100000 shares or more or having value of Rs. 10 lakhs and above whichever is smaller in an account, in an ISIN, which exceed 10 times the avg size of the transaction calculated for the previous months transactions.",
-
-            "Details of off market transactions (within CDSL and inter-depository) where there are more than 20 transactions in an account for the past fortnight.",
-
-            "Any debit transaction in dormant account for more than 50000 shares or rs. 5 lakhs whichever is smaller will be reported as an alert. An account having no 'debit transaction' in the last 12 months will be considered as ' dormant' account for this purpose."
-        ]
-    })
-
-    st.dataframe(
-        alerts,
-        use_container_width=True,
-        hide_index=True
+    st.info(
+        "Details of debit and credit transactions due to off-market or inter- depository transfer transactions, having value of Rs. 10 Lakh and above in an amount in an ISIN, in a single transaction or series of transactions executed during the fortnight."
     )
+
+    st.markdown("###  Alert type-2")
+
+    st.info(
+        "Details of debit and credit transactions due to demat,remat and pledge involving 50000 or more shares, in an account in an ISIN, in a single transaction or series of transactions executed during the fortnight."
+    )
+
+    st.markdown("###  Alert type-3")
+    
+    st.info(
+            "Details of debit and credit transactions involving 100000 shares or more or having value of Rs. 10 lakhs and above whichever is smaller in an account, in an ISIN, which exceed 10 times the avg size of the transaction calculated for the previous months transactions."
+        )
+
+    st.markdown("###  Alert type-4")
+    
+    st.info(
+            "Details of off market transactions (within CDSL and inter-depository) where there are more than 20 transactions in an account for the past fortnight."
+        )
+
+    st.markdown("###  Alert type-5")
+    
+    st.info(
+            "Any debit transaction in dormant account for more than 50000 shares or rs. 5 lakhs whichever is smaller will be reported as an alert. An account having no 'debit transaction' in the last 12 months will be considered as ' dormant' account for this purpose."
+        )
+
 
     st.header("🔍 Search Tips")
 

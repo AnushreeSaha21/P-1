@@ -31,6 +31,19 @@ def show_grid(df):
             }
         )
 
+    if "Alert Types" in df.columns:
+
+        gb.configure_column(
+
+            "Alert Types",
+
+            width=110,
+
+            type=["numericColumn"],
+
+            sort="desc"
+        )
+
     grid_options = gb.build()
 
     AgGrid(
@@ -50,6 +63,29 @@ def show_database():
     )
 
     st.divider()
+
+    defaults = {
+    "report_year": "",
+    "report_month": "",
+    "report_fortnight": "",
+    "fiu_alert_type": "",
+    "source_system": "",
+    "transaction_indicator": "",
+    "source_pan": "",
+    "target_pan": "",
+    "source_name": "",
+    "target_name": "",
+    "source_dp_id": "",
+    "target_dp_id": "",
+    "source_client_id": "",
+    "target_client_id": "",
+    "isin_code": "",
+    "isin_name": "",
+}
+
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
     if "page" not in st.session_state:
         st.session_state.page = 1
@@ -114,7 +150,7 @@ def show_database():
     with col2:
         transaction_indicator = st.selectbox(
             "Txn",
-            ["", "Debit", "Credit"],
+            ["", "DR", "CR"],
     key="transaction_indicator"
         )
 
@@ -185,33 +221,43 @@ def show_database():
             use_container_width=True
         )
 
+    # if clear:
+    #     keys = [
+    #         "report_year",
+    #         "report_month",
+    #         "report_fortnight",
+    #         "fiu_alert_type",
+    #         "source_system",
+    #         "transaction_indicator",
+    #         "source_pan",
+    #         "target_pan",
+    #         "source_name",
+    #         "target_name",
+    #         "source_dp_id",
+    #         "target_dp_id",
+    #         "source_client_id",
+    #         "target_client_id",
+    #         "isin_code",
+    #         "isin_name",
+    #     ]
+
+        
+        
+    #     for key in keys:
+    #         st.session_state.pop(key, None)
+
+    #     st.session_state.search_clicked = False
+    #     st.session_state.page = 1
+
+    #     st.rerun()
+
     if clear:
-        keys = [
-            "report_year",
-            "report_month",
-            "report_fortnight",
-            "fiu_alert_type",
-            "source_system",
-            "transaction_indicator",
-            "source_pan",
-            "target_pan",
-            "source_name",
-            "target_name",
-            "source_dp_id",
-            "target_dp_id",
-            "source_client_id",
-            "target_client_id",
-            "isin_code",
-            "isin_name",
-        ]
 
-        
-        
-        for key in keys:
-            st.session_state.pop(key, None)
+        st.session_state.clear()
 
-        st.session_state.search_clicked = False
+        # Reinitialize the variables your page needs
         st.session_state.page = 1
+        st.session_state.search_clicked = False
 
         st.rerun()
     
@@ -359,6 +405,36 @@ def show_database():
         
         with tab2:
             st.subheader("👤 PAN History")
+            col1, col2 = st.columns([1, 5])
+
+            with col1:
+
+                min_types = st.selectbox(
+
+                    "Min Alert Types",
+
+                    [
+
+                        "All",
+
+                        "2+",
+
+                        "3+",
+
+                        "4+",
+
+                        "5"
+
+                    ]
+                )
+
+            if min_types != "All":
+
+                value = int(min_types.replace("+", ""))
+
+                pan_df = pan_df[
+                    pan_df["Alert Types"] >= value
+                ]
             show_grid(pan_df)
         # st.divider()
 

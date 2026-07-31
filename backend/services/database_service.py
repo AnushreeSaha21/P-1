@@ -144,6 +144,7 @@ def browse_database(
                 columns=[
                     "PAN",
                     "Name",
+                    "Alert Types",
                     "Total Alerts",
                     "FIU Alerts"
                 ]

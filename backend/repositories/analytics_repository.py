@@ -20,13 +20,15 @@ def get_top_cities(
                 FROM vw_alert_summary
                 WHERE source_city IS NOT NULL
                     AND BTRIM(source_city) <> ''
+                    AND LOWER(BTRIM(source_city)) NOT IN ('nan', 'none', 'null')
 
                 UNION ALL
 
                 SELECT target_city AS city
                 FROM vw_alert_summary
-                WHERE target_city IS NOT NULL
+                WHERE source_city IS NOT NULL
                     AND BTRIM(target_city) <> ''
+                    AND LOWER(BTRIM(target_city)) NOT IN ('nan', 'none', 'null')
             ) cities
 
             GROUP BY city
@@ -107,13 +109,14 @@ def get_top_pans(
                 FROM vw_alert_summary
                 WHERE source_pan IS NOT NULL
                     AND BTRIM(source_pan) <> ''
-
+                    AND LOWER(BTRIM(source_pan)) NOT IN ('nan', 'none', 'null')
                 UNION ALL
 
                 SELECT target_pan AS pan
                 FROM vw_alert_summary
                 WHERE target_pan IS NOT NULL
                     AND BTRIM(target_pan) <> ''
+                    AND LOWER(BTRIM(target_pan)) NOT IN ('nan', 'none', 'null')
 
             ) pans
 
@@ -155,6 +158,7 @@ def get_top_isins(
             WHERE
                 isin_code IS NOT NULL
                 AND BTRIM(isin_code) <> ''
+                AND LOWER(BTRIM(isin_code)) NOT IN ('nan', 'none', 'null')
 
             GROUP BY isin_code
 
@@ -194,14 +198,16 @@ def get_city_heatmap(
                         SELECT source_city AS city
                         FROM vw_alert_summary
                         WHERE source_city IS NOT NULL
-                        AND BTRIM(source_city) <> ''
+                            AND BTRIM(source_city) <> ''
+                            AND LOWER(BTRIM(source_city)) NOT IN ('nan', 'none', 'null')
 
                         UNION ALL
 
                         SELECT target_city AS city
                         FROM vw_alert_summary
                         WHERE target_city IS NOT NULL
-                        AND BTRIM(target_city) <> ''
+                            AND BTRIM(target_city) <> ''
+                            AND LOWER(BTRIM(target_city)) NOT IN ('nan', 'none', 'null')
                     ) c
 
                     GROUP BY city
@@ -223,6 +229,9 @@ def get_city_heatmap(
                         report_year,
                         report_month
                     FROM vw_alert_summary
+                    WHERE source_city IS NOT NULL
+                        AND BTRIM(source_city) <> ''
+                        AND LOWER(BTRIM(source_city)) NOT IN ('nan', 'none', 'null')
 
                     UNION ALL
 
@@ -231,6 +240,9 @@ def get_city_heatmap(
                         report_year,
                         report_month
                     FROM vw_alert_summary
+                    WHERE target_city IS NOT NULL
+                        AND BTRIM(target_city) <> ''
+                        AND LOWER(BTRIM(target_city)) NOT IN ('nan', 'none', 'null')
                 ) x
 
                 JOIN top_cities tc
@@ -279,23 +291,27 @@ def get_kpi_cards(
                         SELECT source_pan AS pan
                         FROM vw_alert_summary
                         WHERE source_pan IS NOT NULL
-                        AND BTRIM(source_pan) <> ''
+                            AND BTRIM(source_pan) <> ''
+                            AND LOWER(BTRIM(source_pan)) NOT IN ('nan', 'none', 'null')
 
                         UNION
 
                         SELECT target_pan
                         FROM vw_alert_summary
                         WHERE target_pan IS NOT NULL
-                        AND BTRIM(target_pan) <> ''
+                            AND BTRIM(target_pan) <> ''
+                            AND LOWER(BTRIM(target_pan)) NOT IN ('nan', 'none', 'null')
                     ) p
                 ) AS total_pans,
 
                 (
+                    
                     SELECT COUNT(DISTINCT isin_code)
-                    FROM vw_alert_summary
-                    WHERE isin_code IS NOT NULL
-                    AND BTRIM(isin_code) <> ''
-                ) AS total_isins,
+                        FROM vw_alert_summary
+                        WHERE isin_code IS NOT NULL
+                            AND BTRIM(isin_code) <> ''
+                            AND LOWER(BTRIM(isin_code)) NOT IN ('nan', 'none', 'null')
+                    ) AS total_isins,
 
                 (
                     SELECT COUNT(DISTINCT city)
@@ -304,14 +320,16 @@ def get_kpi_cards(
                         SELECT source_city AS city
                         FROM vw_alert_summary
                         WHERE source_city IS NOT NULL
-                        AND BTRIM(source_city) <> ''
+                            AND BTRIM(source_city) <> ''
+                            AND LOWER(BTRIM(source_city)) NOT IN ('nan', 'none', 'null')
 
                         UNION
 
                         SELECT target_city
                         FROM vw_alert_summary
                         WHERE target_city IS NOT NULL
-                        AND BTRIM(target_city) <> ''
+                            AND BTRIM(target_city) <> ''
+                            AND LOWER(BTRIM(target_city)) NOT IN ('nan', 'none', 'null')
                     ) c
                 ) AS total_cities;
 
