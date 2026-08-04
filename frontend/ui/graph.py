@@ -54,13 +54,12 @@ def show_graph():
 
         result = search_pan(graph, pan)
 
-        if result["degree"] == 0:
-            st.info("This PAN has no connected PANs in the current dataset.")
-                
-
         if result is None:
-
             st.error("PAN not found.")
+            st.stop()
+
+        if result["degree"] == 0:
+            st.info("This PAN has no connected PANs.")
 
         else:
 
@@ -126,75 +125,4 @@ def show_graph():
                 scrolling=False
             )
 
-    # if st.button("Search PAN"):
-
-    #     result = search_pan(graph, pan)
-    #     network = load_subgraph(graph, pan)
-
-    #     if result is None:
-
-    #         st.error("PAN not found.")
-
-    #     else:
-
-    #         st.subheader(result["name"] or "Unknown Name")
-
-    #         st.metric(
-    #             "Neighbours",
-    #             result["degree"]
-    #         )
-
-    #         st.write("### Connected PANs")
-
-    #         # st.write(result["neighbors"])
-    #         neighbors_df = pd.DataFrame(
-    #             result["neighbors"],
-    #             columns=["Connected PAN"]
-    #         )
-
-    #         st.dataframe(
-    #             neighbors_df,
-    #             use_container_width=True
-    #         )
-
-    #         st.write("### Connected Component")
-
-    #         st.write(f"{len(result['component'])} PANs")
-
-    #         st.dataframe(
-    #             pd.DataFrame(
-    #                 result["component"],
-    #                 columns=["PAN"]
-    #             ),
-    #             use_container_width=True
-    #         )
-
-    #     largest = max(
-    #         nx.connected_components(graph),
-    #         key=len
-    #     )
-
-    #     st.caption(
-    #         f"Largest connected network contains {len(largest)} PANs."
-    #     )
-
-
-    # st.subheader("🌐 Network Visualization")
-
-    # network = load_pyvis_graph(graph)
-
-    # tmp = tempfile.NamedTemporaryFile(
-    #         delete=False,
-    #         suffix=".html"
-    #     )
-
-    # network.save_graph(tmp.name)
-
-    # with open(tmp.name, "r", encoding="utf-8") as f:
-
-    #         html = f.read()
-
-    # components.html(
-    #         html,
-    #         height=750
-    #     )
+    
