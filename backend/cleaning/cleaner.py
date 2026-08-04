@@ -18,6 +18,9 @@ def clean_name(name):
     name = str(name).strip()
     name = re.sub(r"\s+", " ", name)
 
+    if name in ("", "NAN", "NONE", "NULL"):
+        return None
+
     return name
 
 
@@ -28,7 +31,7 @@ def clean_pan(pan):
 
     pan = str(pan).strip().upper()
 
-    if pan == "":
+    if pan in ("", "NAN", "NONE", "NULL"):
         return None
 
     return pan
@@ -64,6 +67,9 @@ def clean_isin(isin):
     if pd.isna(isin):
         return None
 
+    if isin in ("", "NAN", "NONE", "NULL"):
+        return None
+
     return str(isin).strip().upper()
 
 
@@ -82,6 +88,9 @@ def clean_address(address):
 def clean_city(city):
     """Trim city names."""
     if pd.isna(city):
+        return None
+
+    if city in ("", "NAN", "NONE", "NULL"):
         return None
 
     return str(city).strip()

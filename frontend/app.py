@@ -9,9 +9,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 
 from ui.upload import show_upload
-from frontend.ui.analytics import show_analytics
+from ui.analytics import show_analytics
 from ui.database import show_database
 from ui.user_guide import show_user_guide
+from ui.graph import show_graph
 
 
 from PIL import Image
@@ -43,7 +44,8 @@ page = st.sidebar.radio(
         "Upload",
         "Analytics",
         "Database",
-        "About"
+        "About",
+        "Graph"
         
     ]
 )
@@ -65,6 +67,9 @@ elif page == "Database":
 
 elif page == "About":
     show_user_guide()
+
+elif page == "Graph":
+    show_graph()
 
 
 
