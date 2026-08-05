@@ -102,7 +102,13 @@ def get_neighbors(graph, pan):
     if pan not in graph:
         return []
 
-    return sorted(graph.neighbors(pan))
+    neighbors = set()
+
+    neighbors.update(graph.predecessors(pan))
+
+    neighbors.update(graph.successors(pan))
+
+    return sorted(neighbors)
 
 def get_degree(graph, pan):
     """

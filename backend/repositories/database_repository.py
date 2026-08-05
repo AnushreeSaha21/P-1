@@ -453,10 +453,15 @@ def get_pan_database_report(
             pan_names AS (
                 SELECT
                     pan,
-                    MAX(name) FILTER (
-                        WHERE name IS NOT NULL
-                        AND BTRIM(name) <> ''
-                    ) AS name
+
+                    CASE
+                        WHEN LOWER(BTRIM(pan)) IN ('nan','none','null')
+                        THEN 'NaN'
+                        ELSE MAX(name) FILTER (
+                            WHERE name IS NOT NULL
+                            AND BTRIM(name) <> ''
+                        )
+                    END AS name
 
                 FROM pan_occurrences
 
