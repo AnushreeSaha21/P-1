@@ -1,0 +1,20 @@
+SELECT
+    source_pan,
+    source_name
+FROM vw_alert_summary
+WHERE source_pan = 'NaN'
+LIMIT 20;
+
+
+
+SELECT
+    target_pan,
+    target_name
+FROM vw_alert_summary
+WHERE target_pan = 'NaN'
+LIMIT 20;
+
+
+SELECT DISTINCT source_pan
+FROM vw_alert_summary
+WHERE LOWER(source_pan) LIKE '%nan%';

@@ -52,8 +52,16 @@ def read_excel(file_path: str, password: str | None = None) -> pd.DataFrame:
 
     if password is None:
         if extension == ".csv":
-            return pd.read_csv(path)
-        return pd.read_excel(path)
+            return pd.read_csv(
+                        path,
+                        keep_default_na=True,
+                        na_values=["", " ", "NaN", "nan", "NULL", "None"]
+                    )
+        return pd.read_excel(
+                path,
+                keep_default_na=True,
+                na_values=["", " ", "NaN", "nan", "NULL", "None"]
+            )
 
     # ------------------------------------
     # Password Protected Excel
