@@ -10,7 +10,10 @@ from backend.graph.graph_builder import (
     get_neighbors,
     get_degree,
     get_component,
-    build_subgraph
+    build_subgraph,
+    get_top_hubs,
+    get_flow,
+    get_top_relationships
 )
 
 from backend.graph.graph_visualizer import (
@@ -48,6 +51,8 @@ def search_pan(graph, pan):
 
         "degree": get_degree(graph, pan),
 
+        "flow": get_flow(graph, pan),
+
         "neighbors": get_neighbors(graph, pan),
 
         "component": get_component(graph, pan)
@@ -71,3 +76,15 @@ def load_subgraph(graph, pan):
         subgraph,
         highlight_pan=pan
     )
+
+def load_top_hubs(graph):
+
+    return get_top_hubs(graph)
+
+def load_top_hubs(graph):
+
+    return get_top_hubs(graph)
+
+def load_flow(graph, pan):
+
+    return get_flow(graph, pan)

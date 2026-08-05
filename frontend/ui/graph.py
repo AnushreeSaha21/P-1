@@ -65,10 +65,29 @@ def show_graph():
 
             st.subheader(result["name"] or "Unknown Name")
 
-            st.metric(
-                "Neighbours",
+            # st.metric(
+            #     "Neighbours",
+            #     result["degree"]
+            # )
+
+            c1, c2, c3 = st.columns(3)
+
+            c1.metric(
+                "Connections",
                 result["degree"]
             )
+
+            c2.metric(
+                "Incoming",
+                result["flow"]["incoming"]
+            )
+
+            c3.metric(
+                "Outgoing",
+                result["flow"]["outgoing"]
+            )
+
+            st.markdown("### Directly Connected PANs")
 
             neighbors_df = pd.DataFrame(
                 result["neighbors"],
@@ -80,7 +99,7 @@ def show_graph():
                 use_container_width=True
             )
 
-            st.write(
+            st.markdown(
                 f"Connected Component: {len(result['component'])} PANs"
             )
 

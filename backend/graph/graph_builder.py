@@ -150,3 +150,75 @@ def build_subgraph(graph, pan):
         return None
 
     return graph.subgraph(component).copy()
+
+
+def get_top_hubs(graph, limit=10):
+    """
+    PANs having the highest number of connections.
+    """
+
+    hubs = []
+
+    for node in graph.nodes():
+
+        hubs.append({
+            "pan": node,
+            "name": graph.nodes[node].get("name", ""),
+            "connections": graph.degree(node)
+        })
+
+    hubs.sort(
+        key=lambda x: x["connections"],
+        reverse=True
+    )
+
+    return hubs[:limit]
+
+
+def get_flow(graph, pan):
+    """
+    Incoming vs outgoing relationships.
+    """
+
+    pan = pan.strip().upper()
+
+    if pan not in graph:
+        return None
+
+    return {
+
+        "incoming": graph.in_degree(pan),
+
+        "outgoing": graph.out_degree(pan)
+
+    }
+
+
+def get_top_relationships(graph, limit=10):
+    """
+    Highest transaction relationships.
+    """
+
+    edges = []
+
+    for source, target, data in graph.edges(data=True):
+
+        edges.append({
+
+            "source": source,
+
+            "target": target,
+
+            "transactions": data.get("transactions", 1)
+
+        })
+
+    edges.sort(
+
+        key=lambda x: x["transactions"],
+
+        reverse=True
+
+    )
+
+    return edges[:limit]
