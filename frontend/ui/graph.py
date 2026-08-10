@@ -8,7 +8,9 @@ from backend.graph.graph_service import (
     load_graph,
     search_pan,
     load_pyvis_graph,
-    load_subgraph
+    load_subgraph,
+    get_dashboard,
+    find_bridge_pans
 )
 
 
@@ -44,104 +46,150 @@ def show_graph():
     )
 
 
+    st.subheader("🔥 Top Connected PANs")
+
+    dashboard = get_dashboard(graph)
+
+    dashboard_df = pd.DataFrame(dashboard)
+
+    st.dataframe(
+        dashboard_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    bridge_pans = find_bridge_pans(graph, limit=15)
+
+    bridge_df = pd.DataFrame(bridge_pans)
+
+    st.subheader("🌉 Top 15 Bridge PANs")
+
+    st.dataframe(
+        bridge_df,
+        use_container_width=True,
+        hide_index=True
+)
+
     st.subheader("🔍 Explore PAN")
 
-    pan = st.text_input("Enter PAN")
+    manual_pan = st.text_input(
+        "Enter PAN",
+        placeholder="e.g. ABCDE1234F"
+    )
 
     st.subheader("🌐 Network Visualization")
 
-    if st.button("Search PAN"):
+    if st.button("🔎 Visualize"):
 
-        result = search_pan(graph, pan)
+        pan = manual_pan.strip().upper()
 
-        if result is None:
-            st.error("PAN not found.")
-            st.stop()
+        if not pan:
 
-        if result["degree"] == 0:
-            st.info("This PAN has no connected PANs.")
+            st.warning("Please enter a PAN.")
 
         else:
 
-            st.subheader(result["name"] or "Unknown Name")
+            result = search_pan(graph, pan)
 
-            # st.metric(
-            #     "Neighbours",
-            #     result["degree"]
-            # )
+            if result is None:
 
-            c1, c2, c3 = st.columns(3)
+                st.error("PAN not found.")
 
-            c1.metric(
-                "Connections",
-                result["degree"]
-            )
+            elif result["degree"] == 0:
 
-            c2.metric(
-                "Incoming",
-                result["flow"]["incoming"]
-            )
+                st.info("This PAN has no connected PANs.")
 
-            c3.metric(
-                "Outgoing",
-                result["flow"]["outgoing"]
-            )
+            else:
 
-            st.markdown("### Directly Connected PANs")
+                st.subheader(
+                    result["name"] or "Unknown Name"
+                )
 
-            neighbors_df = pd.DataFrame(
-                result["neighbors"],
-                columns=["Connected PAN"]
-            )
+                c1, c2, c3 = st.columns(3)
 
-            st.dataframe(
-                neighbors_df,
-                use_container_width=True
-            )
+                c1.metric(
+                    "Connections",
+                    result["degree"]
+                )
 
-            st.markdown(
-                f"Connected Component: {len(result['component'])} PANs"
-            )
+                c2.metric(
+                    "Incoming",
+                    result["flow"]["incoming"]
+                )
 
-            network = load_subgraph(graph, pan)
+                c3.metric(
+                    "Outgoing",
+                    result["flow"]["outgoing"]
+                )
 
-            tmp = tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".html"
-            )
+                st.markdown(
+                    "### Directly Connected PANs"
+                )
 
-            network.save_graph(tmp.name)
-            print(tmp.name)
+                neighbors_df = pd.DataFrame(
+                    result["neighbors"],
+                    columns=["Connected PAN"]
+                )
 
-            with open(tmp.name, "r", encoding="utf-8") as f:
-                html_content = f.read()
+                st.dataframe(
+                    neighbors_df,
+                    use_container_width=True
+                )
 
-            html_content = html_content.replace(
-                "</head>",
-                """
-                <style>
-                    html, body {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: #0E1117 !important;
-                        overflow: hidden;
-                    }
+                st.markdown(
+                    f"Connected Component: "
+                    f"{len(result['component'])} PANs"
+                )
 
-                    #mynetwork {
-                        border: none !important;
-                    }
+                network = load_subgraph(
+                    graph,
+                    pan
+                )
 
-                    canvas {
-                        border: none !important;
-                    }
-                </style>
-                </head>
-                """
-            )
-            html(
-                html_content,
-                height=750,
-                scrolling=False
-            )
+                tmp = tempfile.NamedTemporaryFile(
+                    delete=False,
+                    suffix=".html"
+                )
+
+                network.save_graph(tmp.name)
+
+                with open(
+                    tmp.name,
+                    "r",
+                    encoding="utf-8"
+                ) as f:
+
+                    html_content = f.read()
+
+                html_content = html_content.replace(
+                    "</head>",
+                    """
+                    <style>
+
+                        html, body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background: #0E1117 !important;
+                            overflow: hidden;
+                        }
+
+                        #mynetwork {
+                            border: none !important;
+                        }
+
+                        canvas {
+                            border: none !important;
+                        }
+
+                    </style>
+                    </head>
+                    """
+                )
+
+                html(
+                    html_content,
+                    height=750,
+                    scrolling=False
+                )
 
     

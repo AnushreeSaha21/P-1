@@ -228,3 +228,71 @@ def get_top_relationships(graph, limit=10):
     )
 
     return edges[:limit]
+
+
+def get_top_connected_pans(graph, limit=15):
+    """
+    Returns PANs having the highest total degree.
+    """
+
+    rows = []
+
+    for node, data in graph.nodes(data=True):
+
+        rows.append({
+
+            "PAN": node,
+
+            "Name": data.get("name", ""),
+
+            "Connections": graph.degree(node),
+
+            "Incoming": graph.in_degree(node),
+
+            "Outgoing": graph.out_degree(node)
+
+        })
+
+    rows.sort(
+        key=lambda x: x["Connections"],
+        reverse=True
+    )
+
+    return rows[:limit]
+
+
+def find_bridge_pans(graph, limit=15):
+    """
+    Returns the top structural bridge PANs.
+
+    Bridge PANs are articulation points in the
+    undirected version of the transaction graph.
+    """
+
+    if graph.number_of_nodes() == 0:
+        return []
+
+    undirected_graph = graph.to_undirected()
+
+    articulation_points = nx.articulation_points(
+        undirected_graph
+    )
+
+    results = []
+
+    for pan in articulation_points:
+
+        results.append({
+            "PAN": pan,
+            "Name": graph.nodes[pan].get("name", ""),
+            "Connections": graph.degree(pan),
+            "Incoming": graph.in_degree(pan),
+            "Outgoing": graph.out_degree(pan)
+        })
+
+    results.sort(
+        key=lambda x: x["Connections"],
+        reverse=True
+    )
+
+    return results[:limit]

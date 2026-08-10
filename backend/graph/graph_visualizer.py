@@ -8,7 +8,8 @@ def build_pyvis_graph(graph, highlight_pan=None):
         width="100%",
         bgcolor="#0E1117",
         font_color="white",
-        notebook=False
+        notebook=False,
+        directed=True
     )
 
     # Smooth physics
@@ -85,7 +86,8 @@ def build_pyvis_graph(graph, highlight_pan=None):
 
             value=data.get("transactions", 1),
 
-            title=f"Transactions : {data.get('transactions',1)}"
+            title=f"Transactions : {data.get('transactions',1)}",
+            arrows="to"
         )
     
     return net

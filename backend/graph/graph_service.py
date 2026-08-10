@@ -13,7 +13,9 @@ from backend.graph.graph_builder import (
     build_subgraph,
     get_top_hubs,
     get_flow,
-    get_top_relationships
+    get_top_relationships,
+    get_top_connected_pans,
+    find_bridge_pans
 )
 
 from backend.graph.graph_visualizer import (
@@ -88,3 +90,30 @@ def load_top_hubs(graph):
 def load_flow(graph, pan):
 
     return get_flow(graph, pan)
+
+def get_dashboard(graph):
+
+    return get_top_connected_pans(graph)
+
+def get_bridge_pan_details(graph):
+
+    bridges = find_bridge_pans(graph)
+
+    results = []
+
+    for pan in bridges:
+
+        results.append({
+            "PAN": pan,
+            "Name": graph.nodes[pan].get("name", ""),
+            "Connections": graph.degree(pan),
+            "Incoming": graph.in_degree(pan),
+            "Outgoing": graph.out_degree(pan)
+        })
+
+    results.sort(
+        key=lambda x: x["Connections"],
+        reverse=True
+    )
+
+    return results
