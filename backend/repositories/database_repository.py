@@ -360,6 +360,7 @@ def get_pan_database_report(
     cursor = connection.cursor()
 
     try:
+
         where_clause, params = _build_database_filters(
 
             report_year=report_year,
@@ -387,6 +388,7 @@ def get_pan_database_report(
 
         query = f"""
             WITH filtered AS (
+
                 SELECT
                     source_pan,
                     source_name,
@@ -398,105 +400,150 @@ def get_pan_database_report(
                     report_fortnight
 
                 FROM vw_alert_summary
+
                 WHERE 1=1
                 {where_clause}
             ),
 
             pan_occurrences AS (
 
+                -- -----------------------------------------
+                -- SOURCE
+                -- -----------------------------------------
+
                 SELECT
+
                     source_pan AS pan,
                     source_name AS name,
+
+                    CASE
+                        WHEN source_pan IS NOT NULL
+                             AND BTRIM(source_pan) <> ''
+                        THEN 'PAN:' || UPPER(BTRIM(source_pan))
+
+                        WHEN source_name IS NOT NULL
+                             AND BTRIM(source_name) <> ''
+                        THEN 'NAME:' || UPPER(BTRIM(source_name))
+
+                        ELSE 'UNKNOWN'
+                    END AS pan_key,
+
                     fiu_alert_type,
                     report_year,
                     report_month,
                     report_fortnight
+
                 FROM filtered
-                WHERE
-                    source_pan IS NOT NULL
-                    AND BTRIM(source_pan) <> ''
 
                 UNION ALL
 
+                -- -----------------------------------------
+                -- TARGET
+                -- -----------------------------------------
+
                 SELECT
+
                     target_pan AS pan,
                     target_name AS name,
+
+                    CASE
+                        WHEN target_pan IS NOT NULL
+                             AND BTRIM(target_pan) <> ''
+                        THEN 'PAN:' || UPPER(BTRIM(target_pan))
+
+                        WHEN target_name IS NOT NULL
+                             AND BTRIM(target_name) <> ''
+                        THEN 'NAME:' || UPPER(BTRIM(target_name))
+
+                        ELSE 'UNKNOWN'
+                    END AS pan_key,
+
                     fiu_alert_type,
                     report_year,
                     report_month,
                     report_fortnight
+
                 FROM filtered
-                WHERE
-                    target_pan IS NOT NULL
-                    AND BTRIM(target_pan) <> ''
             ),
 
             alert_groups AS (
+
                 SELECT
-                    pan,
+
+                    pan_key,
+
                     fiu_alert_type,
                     report_year,
                     report_month,
                     report_fortnight,
+
                     COUNT(*) AS transaction_count
 
                 FROM pan_occurrences
 
                 GROUP BY
-                    pan,
+
+                    pan_key,
                     fiu_alert_type,
                     report_year,
                     report_month,
                     report_fortnight
             ),
 
-            pan_names AS (
+            pan_details AS (
+
                 SELECT
-                    pan,
 
-                    CASE
-                        WHEN LOWER(BTRIM(pan)) IN ('nan','none','null')
-                        THEN 'NaN'
-                        ELSE MAX(name) FILTER (
-                            WHERE name IS NOT NULL
-                            AND BTRIM(name) <> ''
-                        )
-                    END AS name
+                    pan_key,
 
-                FROM pan_occurrences
+                    MAX(pan) FILTER (
+                        WHERE pan IS NOT NULL
+                        AND BTRIM(pan) <> ''
+                    ) AS pan,
 
-                GROUP BY pan
-            ),
+                    MAX(name) FILTER (
+                        WHERE name IS NOT NULL
+                        AND BTRIM(name) <> ''
+                    ) AS name,
 
-            pan_totals AS (
-                SELECT
-                    pan,
                     COUNT(*) AS total_alerts,
 
-                    COUNT(DISTINCT fiu_alert_type) AS alert_types
+                    COUNT(
+                        DISTINCT fiu_alert_type
+                    ) AS alert_types
 
                 FROM pan_occurrences
 
-                GROUP BY pan
+                GROUP BY pan_key
             )
 
             SELECT
-                t.pan,
-                n.name,
-                t.alert_types,
-                t.total_alerts,
+
+                d.pan,
+
+                d.name,
+
+                d.alert_types,
+
+                d.total_alerts,
 
                 STRING_AGG(
+
                     CONCAT(
+
                         'FIU-',
                         a.fiu_alert_type,
+
                         ' (',
+
                         CASE
                             WHEN a.report_fortnight = 1
                                 THEN '1st Fortnight'
                             ELSE '2nd Fortnight'
                         END,
+
                         ', ',
+
                         TO_CHAR(
                             MAKE_DATE(
                                 a.report_year,
@@ -505,42 +552,50 @@ def get_pan_database_report(
                             ),
                             'Mon YYYY'
                         ),
+
                         ')',
+
                         CASE
                             WHEN a.transaction_count > 1
+
                             THEN CONCAT(
                                 ' [',
                                 a.transaction_count,
                                 ' Transactions]'
                             )
+
                             ELSE ''
                         END
                     ),
+
                     E'\\n'
+
                     ORDER BY
                         a.report_year,
                         a.report_month,
                         a.report_fortnight,
                         a.fiu_alert_type
+
                 ) AS fiu_alerts
 
-            FROM pan_totals t
+            FROM pan_details d
 
             JOIN alert_groups a
-                ON a.pan = t.pan
-
-            LEFT JOIN pan_names n
-                ON n.pan = t.pan
+                ON a.pan_key = d.pan_key
 
             GROUP BY
-                t.pan,
-                n.name,
-                t.alert_types,
-                t.total_alerts
+
+                d.pan,
+                d.name,
+                d.alert_types,
+                d.total_alerts
 
             ORDER BY
-                t.total_alerts DESC,
-                t.pan
+
+                d.total_alerts DESC,
+
+                d.pan,
+                d.name
         """
 
         cursor.execute(
@@ -551,6 +606,7 @@ def get_pan_database_report(
         return cursor.fetchall()
 
     finally:
+
         cursor.close()
 
 def get_isin_database_report(

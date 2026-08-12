@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import pandas as pd
 
 from backend.services.analytics_service import (
     load_analytics
@@ -269,3 +270,136 @@ def show_analytics():
 
         use_container_width=True
     )
+
+
+    st.divider()
+
+    st.subheader("🤖 AI Analytics Insights")
+
+    st.write(
+        "Generate an AI-assisted interpretation of the analytics shown above."
+    )
+
+    # ---------------------------------------------------------
+    # Prepare exact month-to-month changes for AI
+    # ---------------------------------------------------------
+
+    trend_for_ai = trend_df.copy()
+
+    trend_for_ai["Period"] = pd.to_datetime(
+        trend_for_ai["Period"]
+    )
+
+    trend_for_ai = trend_for_ai.sort_values("Period")
+
+    monthly_changes = []
+
+    for i in range(1, len(trend_for_ai)):
+
+        previous = trend_for_ai.iloc[i - 1]
+        current = trend_for_ai.iloc[i]
+
+        previous_period = previous["Period"]
+        current_period = current["Period"]
+
+        # Only compare consecutive calendar months
+        month_difference = (
+            (current_period.year - previous_period.year) * 12
+            + (current_period.month - previous_period.month)
+        )
+
+        if month_difference == 1:
+
+            previous_alerts = int(previous["Alerts"])
+            current_alerts = int(current["Alerts"])
+
+            change = current_alerts - previous_alerts
+
+            monthly_changes.append({
+                "from": previous_period.strftime("%b %Y"),
+                "to": current_period.strftime("%b %Y"),
+                "from_alerts": previous_alerts,
+                "to_alerts": current_alerts,
+                "change": change,
+                "direction": (
+                    "increase"
+                    if change > 0
+                    else "decrease"
+                    if change < 0
+                    else "no change"
+                )
+            })
+
+    largest_increase = max(
+        monthly_changes,
+        key=lambda x: x["change"],
+        default=None
+    )
+
+    largest_decrease = min(
+        monthly_changes,
+        key=lambda x: x["change"],
+        default=None
+    )
+
+    if st.button("🔎 Analyze Analytics"):
+
+        analytics_context = {
+
+            "kpis": {
+                "total_alerts": int(kpis[0]),
+                "unique_pans": int(kpis[1]),
+                "unique_isins": int(kpis[2]),
+                "unique_cities": int(kpis[3])
+            },
+
+            # -----------------------------------------------------
+            # Top cities
+            # -----------------------------------------------------
+
+            "top_cities": city_df.to_dict(
+                orient="records"
+            ),
+
+            # -----------------------------------------------------
+            # Monthly data
+            # -----------------------------------------------------
+
+            "monthly_trend": trend_for_ai.to_dict(
+                orient="records"
+            ),
+
+            "monthly_changes": monthly_changes,
+
+            # -----------------------------------------------------
+            # Top PANs
+            # -----------------------------------------------------
+
+            "top_pans": pan_df.to_dict(
+                orient="records"
+            ),
+
+            # -----------------------------------------------------
+            # Top ISINs
+            # -----------------------------------------------------
+
+            "top_isins": isin_df.to_dict(
+                orient="records"
+            ),
+
+            "largest_monthly_increase": largest_increase,
+            "largest_monthly_decrease": largest_decrease,
+               
+        }
+
+        with st.spinner("Analyzing analytics..."):
+
+            from backend.ai.ollama_service import (
+                analyze_analytics
+            )
+
+            ai_result = analyze_analytics(
+                analytics_context
+            )
+
+        st.markdown(ai_result)

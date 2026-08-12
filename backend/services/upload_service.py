@@ -94,22 +94,6 @@ def upload_file(
         
         print(report_rows[0])
 
-        # print("Total report rows:", len(report_rows))
-
-        # print(
-        #     "File IDs returned:",
-        #     sorted(set(row[2] for row in report_rows))
-        # )
-
-        # print(
-        #     "Rows with current file:",
-        #     len([row for row in report_rows if row[2] == file_id])
-        # )
-
-        # summary, report_df = build_upload_report(
-        #                 report_rows,
-        #                 file_id
-        #             )
 
         summary, report_df = build_pan_history_report(
             report_rows,

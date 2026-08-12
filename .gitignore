@@ -119,10 +119,12 @@ fiu1_drcr_sum_150626.xlsx
 backend/database/exampleconfig.py
 fiu1_drcr_sum_150625.xlsx
 idk.txt
+frontend/ui/upload1.txt
+FIU_1_15Sep25.xlsx
 
 backend/services/REMOVE_isin_database_report.py
 backend/services/REMOVE_pan_database_report.py
 ss/
 
-backend/ai/
+
 test_ollama.py
