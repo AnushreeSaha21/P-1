@@ -43,7 +43,7 @@ GRAPH DATA:
 
 def build_analyze_analytics_prompt(analytics_context):
 
-    prompt = f"""
+   prompt = f"""
     You are an AI assistant for an FIU financial analytics system.
 
     Analyze ONLY the statistics supplied below.
@@ -150,6 +150,8 @@ def build_analyze_analytics_prompt(analytics_context):
     Keep the response concise and suitable for an FIU investigator.
 
     DATA:
-
     {analytics_context}
     """
+
+
+   return prompt
