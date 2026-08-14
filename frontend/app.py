@@ -13,6 +13,7 @@ from ui.analytics import show_analytics
 from ui.database import show_database
 from ui.user_guide import show_user_guide
 from ui.graph import show_graph
+from ui.network_analysis import show_network_analysis
 
 
 from PIL import Image
@@ -45,7 +46,8 @@ page = st.sidebar.radio(
         "Analytics",
         "Database",
         "About",
-        "Graph"
+        "Graph",
+        "NW"
         
     ]
 )
@@ -70,6 +72,8 @@ elif page == "About":
 
 elif page == "Graph":
     show_graph()
+elif page == "NW":
+    show_network_analysis()
 
 
 
