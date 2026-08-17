@@ -157,119 +157,96 @@ def build_analyze_analytics_prompt(analytics_context):
    return prompt
 
 
-def build_network_analysis_prompt(network_context):
+
+
+
+def build_pan_explorer_analysis_prompt(pan_context):
 
     return f"""
 You are an AI assistant for an FIU financial analytics system.
 
-Analyze ONLY the transaction-network information supplied below.
+Analyze ONLY the PAN network statistics supplied below.
 
-Your role is to help an FIU investigator understand an observed
-network pattern. Do not make accusations or conclusions that are
-not supported by the supplied data.
+Your purpose is to help an FIU investigator understand the
+observed network structure of the selected PAN.
 
 STRICT RULES:
 
-1. Do not invent PANs, ISINs, transactions, alerts, dates,
+1. Do not invent PANs, transactions, ISINs, alerts,
    reporting periods, or relationships.
 
 2. Treat all supplied numerical values as authoritative.
 
 3. Do not recalculate supplied values.
 
-4. Do not describe a pattern as suspicious, fraudulent, illegal,
-   or high-risk unless the supplied data explicitly supports
-   such a classification.
+4. Do not call the PAN suspicious, fraudulent, illegal,
+   or high-risk unless the supplied data explicitly
+   contains such a classification.
 
-5. A circular relationship by itself does not establish
-   suspicious or fraudulent activity.
+5. High transaction counts or many connections do not
+   by themselves indicate suspicious activity.
 
-6. A reciprocal relationship by itself does not establish
-   suspicious or fraudulent activity.
+6. A self-loop does not by itself indicate suspicious activity.
 
-7. A high number of transactions does not by itself indicate
-   suspicious or high-risk activity.
+7. A reciprocal relationship does not by itself indicate
+   suspicious activity.
 
-8. A common ISIN across relationships does not by itself prove
-   that an asset was passed between PANs.
+8. A circular transaction pattern does not by itself
+   indicate suspicious activity.
 
-9. "Common ISIN" means only that the supplied transaction records
-   contain the same ISIN across the relevant relationships.
+9. A common ISIN does not prove that an asset was passed
+   between PANs.
 
-10. "Chronological = Yes" means that the observed reporting
-    periods can be ordered chronologically based on the supplied
-    reporting-period information. Do not interpret this as proof
-    of the actual sequence of individual transactions.
+10. Clearly distinguish observed facts from interpretation.
 
-11. Do not invent transaction ordering when only reporting-period
-    information is supplied.
+11. If a structural characteristic may deserve investigation,
+    describe it as a "potential area for further review".
 
-12. Do not infer intent from the network structure.
+12. Do not infer intent from network structure.
 
-13. Clearly distinguish observed facts from interpretation.
+13. Do not invent transaction ordering.
 
-14. If an observation may warrant investigation, describe it as
-    a "potential area for further review".
+14. If the supplied information is insufficient for a conclusion,
+    explicitly say so.
 
-15. Do not call anything suspicious merely because it forms
-    a cycle, reciprocal relationship, or multi-hop path.
+15. Keep the analysis concise and suitable for an FIU investigator.
 
-16. If the supplied information is insufficient to draw a
-    conclusion, explicitly state that.
+Provide the response using exactly these sections:
 
-17. Do not refer to information that is not present in the
-    supplied network context.
+### Network Summary
 
-18. Keep the analysis concise and suitable for an FIU investigator.
+Describe the selected PAN's incoming, outgoing, and total
+direct relationships.
 
-Analyze the following:
+### Observed Network Patterns
 
-### Network Pattern
+State whether the supplied data shows:
 
-1. Pattern type
-2. PAN path
-3. Number of PANs
-4. Transaction volume
-5. Relationships between PANs
-6. ISIN information
-7. Reporting-period / chronological information
-8. Potential structural observations
-9. Potential areas for further review
-10. Evidence-based overall assessment
+- self-loop involvement
+- reciprocal relationship involvement
+- circular transaction involvement
 
-Use the following structure:
+Only report what the supplied flags say.
 
-### Observed Pattern
+### Transaction Observations
 
-Describe exactly what the supplied data shows.
-
-### Transaction Relationships
-
-Summarize the supplied relationships, transaction counts,
-alert counts, and ISIN information.
-
-### Temporal Observation
-
-Describe the supplied chronological information, if available.
-
-Do not infer individual transaction timing beyond the supplied
-reporting periods.
+Describe the supplied transaction counts and ISIN information.
 
 ### Potential Area for Further Review
 
-Identify only data-supported characteristics that may warrant
-further examination.
+If the PAN has self-loop, reciprocal, or circular relationships,
+these may be described as potential areas for further review.
 
-Do not characterize them as wrongdoing.
+Do not describe them as suspicious or fraudulent.
 
 ### Overall Assessment
 
 Provide a concise evidence-based assessment.
 
 If the supplied information is insufficient to determine whether
-the pattern represents unusual or suspicious activity, say so.
+the activity is unusual or suspicious, say so.
 
-NETWORK DATA:
+PAN NETWORK DATA:
 
-{network_context}
+{pan_context}
 """

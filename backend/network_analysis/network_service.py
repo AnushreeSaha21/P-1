@@ -642,14 +642,25 @@ def build_pan_visualization(
             "hover": true,
             "zoomView": true,
             "dragView": true,
-            "navigationButtons": true
+            "navigationButtons": true,
+            "hideEdgesOnDrag": true
         },
 
         "physics": {
             "enabled": true,
-
             "stabilization": {
-                "iterations": 100
+                "enabled": true,
+                "iterations": 150,
+                "fit": true
+            },
+            "solver": "forceAtlas2Based",
+            "forceAtlas2Based": {
+                "gravitationalConstant": -80,
+                "centralGravity": 0.01,
+                "springLength": 150,
+                "springConstant": 0.05,
+                "damping": 0.8,
+                "avoidOverlap": 1
             }
         },
 

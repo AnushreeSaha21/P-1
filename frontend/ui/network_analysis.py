@@ -14,85 +14,41 @@ from backend.network_analysis.network_service import (
 )
 
 from backend.ai.ollama_service import (
-    analyze_network_pattern
+    
+    analyze_pan_explorer
 )
 
-@st.fragment
-def render_ai_analysis():
 
-    st.subheader("🤖 AI Network Insights")
-
-    selected_cycle = st.session_state.get(
-        "selected_cycle"
+def swap_path_pans():
+    (
+        st.session_state.path_source_pan,
+        st.session_state.path_target_pan
+    ) = (
+        st.session_state.path_target_pan,
+        st.session_state.path_source_pan
     )
 
-    if selected_cycle is None:
+@st.fragment
+def render_pan_ai_analysis(pan_context):
 
-        st.info(
-            "Select and visualize a circular transaction pattern "
-            "before requesting AI analysis."
-        )
 
-        return
+    st.write(
+        "Generate an evidence-based summary of the "
+        "selected PAN's network structure."
+    )
 
     if st.button(
-        "🤖 Analyze Selected Pattern"
+        "🤖 Analyze PAN Network",
+        use_container_width=True,
+        key="analyze_pan_network"
     ):
 
-        graph_context = {
-
-            "pattern_type": "circular_transaction",
-
-            "pan_path": selected_cycle["PANs"],
-
-            "cycle_length": selected_cycle["Length"],
-
-            "common_isins": selected_cycle.get(
-                "Common_ISINs",
-                []
-            ),
-
-            "all_isins": selected_cycle.get(
-                "ISINs",
-                []
-            ),
-
-            "chronological": selected_cycle.get(
-                "Chronological",
-                False
-            ),
-
-            "relationships": [
-
-                {
-                    "source": relationship["source"],
-                    "target": relationship["target"],
-
-                    "transactions": relationship.get(
-                        "transactions",
-                        0
-                    ),
-
-                    "alerts": len(
-                        relationship.get(
-                            "alerts",
-                            []
-                        )
-                    )
-                }
-
-                for relationship in selected_cycle[
-                    "relationships"
-                ]
-            ]
-        }
-
         with st.spinner(
-            "Analyzing transaction pattern..."
+            "Analyzing PAN network..."
         ):
 
-            ai_result = analyze_network_pattern(
-                graph_context
+            ai_result = analyze_pan_explorer(
+                pan_context
             )
 
         st.markdown(ai_result)
@@ -574,14 +530,6 @@ def show_network_analysis():
                         scrolling=False
                     )
 
-                # -------------------------------------------------
-                # AI ANALYSIS
-                # -------------------------------------------------
-
-                st.divider()
-
-                render_ai_analysis()
-
     # =========================================================
     # TAB 2 — SOURCE → TARGET PATH
     # =========================================================
@@ -615,6 +563,13 @@ def show_network_analysis():
                 key="path_target_pan"
             )
 
+        st.button(
+            "⇄ Swap Source ↔ Target",
+            use_container_width=True,
+            key="swap_pan_button",
+            on_click=swap_path_pans
+        )
+
         st.divider()
 
         if st.button(
@@ -629,14 +584,7 @@ def show_network_analysis():
             if not source or not target:
 
                 st.warning(
-                    "Please enter both Source PAN "
-                    "and Target PAN."
-                )
-
-            elif source == target:
-
-                st.warning(
-                    "Source PAN and Target PAN must be different."
+                    "Please enter both Source PAN and Target PAN."
                 )
 
             else:
@@ -673,9 +621,18 @@ def show_network_analysis():
 
                 else:
 
-                    st.success(
-                        "Transaction path found."
-                    )
+                    if source == target:
+
+                        st.info(
+                            f"The source and target are the same PAN: "
+                            f"{source}. This represents a self-loop query."
+                        )
+
+                    else:
+
+                        st.success(
+                            "Transaction path found."
+                        )
 
                     st.markdown(
                         "### 🔗 Transaction Path"
@@ -706,9 +663,9 @@ def show_network_analysis():
 
                     path_rows = []
 
-                    for relationship in (
-                        path_result["relationships"]
-                    ):
+                    for relationship in path_result[
+                        "relationships"
+                    ]:
 
                         path_rows.append({
 
@@ -719,24 +676,16 @@ def show_network_analysis():
                                 relationship["target"],
 
                             "Transactions":
-                                relationship[
-                                    "transactions"
-                                ],
+                                relationship["transactions"],
 
                             "Alerts":
-                                relationship[
-                                    "alerts"
-                                ],
+                                relationship["alerts"],
 
                             "ISINs": (
                                 ", ".join(
-                                    relationship[
-                                        "isins"
-                                    ]
+                                    relationship["isins"]
                                 )
-                                if relationship[
-                                    "isins"
-                                ]
+                                if relationship["isins"]
                                 else "Not available"
                             )
 
@@ -1298,3 +1247,183 @@ def show_network_analysis():
                 st.info(
                     "No outgoing relationships found."
                 )
+
+            # =========================================================
+            # AI NETWORK ANALYSIS
+            # =========================================================
+
+            st.divider()
+
+            st.subheader("🤖 AI Network Insights")
+
+            # ---------------------------------------------------------
+            # Self-loop
+            # ---------------------------------------------------------
+
+            self_loop = analysis_graph.has_edge(
+                pan,
+                pan
+            )
+
+            self_loop_transactions = 0
+
+            if self_loop:
+
+                self_loop_transactions = analysis_graph[
+                    pan
+                ][
+                    pan
+                ].get(
+                    "transactions",
+                    0
+                )
+
+
+            # ---------------------------------------------------------
+            # Reciprocal relationships
+            # ---------------------------------------------------------
+
+            pan_reciprocal_relationships = [
+
+                relationship
+
+                for relationship in reciprocal_relationships
+
+                if (
+                    relationship["source"] == pan
+                    or
+                    relationship["target"] == pan
+                )
+            ]
+
+
+            # ---------------------------------------------------------
+            # Circular relationships
+            # ---------------------------------------------------------
+
+            pan_circular_patterns = [
+
+                cycle
+
+                for cycle in cycles
+
+                if pan in cycle["PANs"]
+            ]
+
+
+            # ---------------------------------------------------------
+            # Transaction totals
+            # ---------------------------------------------------------
+
+            incoming_transactions = sum(
+                relationship.get(
+                    "transactions",
+                    0
+                )
+                for relationship in incoming
+            )
+
+            outgoing_transactions = sum(
+                relationship.get(
+                    "transactions",
+                    0
+                )
+                for relationship in outgoing
+            )
+
+
+            # ---------------------------------------------------------
+            # Unique ISINs
+            # ---------------------------------------------------------
+
+            all_isins = set()
+
+            for relationship in incoming + outgoing:
+
+                for isin in relationship.get(
+                    "isins",
+                    []
+                ):
+
+                    all_isins.add(isin)
+
+
+            # ---------------------------------------------------------
+            # AI Context
+            # ---------------------------------------------------------
+
+            pan_context = {
+
+                "pan": pan,
+
+                "direct_relationships": (
+                    explorer_result[
+                        "total_connections"
+                    ]
+                ),
+
+                "incoming_relationships": len(
+                    incoming
+                ),
+
+                "outgoing_relationships": len(
+                    outgoing
+                ),
+
+                "incoming_transactions": (
+                    incoming_transactions
+                ),
+
+                "outgoing_transactions": (
+                    outgoing_transactions
+                ),
+
+                "total_transactions": (
+                    incoming_transactions
+                    +
+                    outgoing_transactions
+                ),
+
+                "unique_isins": len(
+                    all_isins
+                ),
+
+                "isin_values": sorted(
+                    all_isins
+                ),
+
+                "self_loop": self_loop,
+
+                "self_loop_transactions": (
+                    self_loop_transactions
+                ),
+
+                "reciprocal_relationship": (
+                    len(
+                        pan_reciprocal_relationships
+                    ) > 0
+                ),
+
+                "reciprocal_relationship_count": (
+                    len(
+                        pan_reciprocal_relationships
+                    )
+                ),
+
+                "circular_transaction": (
+                    len(
+                        pan_circular_patterns
+                    ) > 0
+                ),
+
+                "circular_pattern_count": (
+                    len(
+                        pan_circular_patterns
+                    )
+                )
+            }
+
+
+            render_pan_ai_analysis(
+                pan_context
+            )
