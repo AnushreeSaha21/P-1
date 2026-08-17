@@ -191,11 +191,10 @@ def show_user_guide():
     **Version 1.0**
 
     Developed by  
-    **Anushree Saha**
-
-    Data Science Intern
+    **Anushree Saha**  
+    *(Data Science Intern)*
 
     Project completed under the guidance of  
-    **Bedobani Chaudhari**  
-    *Additional Director*
+    **Bedobani Chaudhari Mam**  
+    *(Additional Director)*
     """)

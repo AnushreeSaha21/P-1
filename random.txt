@@ -18,3 +18,104 @@ LIMIT 20;
 SELECT DISTINCT source_pan
 FROM vw_alert_summary
 WHERE LOWER(source_pan) LIKE '%nan%';
+
+
+
+frontend/app.py
+frontend/ui/user_guide.py
+frontend/ui/network_analysis.py
+backend/network_analysis
+backend/ai
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# =========================================================
+    # SELECTED PATTERN VISUALIZATION
+    # =========================================================
+
+    st.subheader("🌐 Selected Pattern Visualization")
+
+    if st.session_state.selected_cycle_graph is None:
+
+        st.info(
+            "Select a circular transaction pattern above "
+            "to visualize it."
+        )
+
+    else:
+
+        network = build_cycle_visualization(
+            st.session_state.selected_cycle_graph
+        )
+
+        network.save_graph(
+            "selected_cycle.html"
+        )
+
+        with open(
+            "selected_cycle.html",
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            html_content = f.read()
+
+        # -----------------------------------------------------
+        # Clean PyVis container
+        # -----------------------------------------------------
+
+        html_content = html_content.replace(
+            "</head>",
+            """
+            <style>
+
+                html,
+                body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #0E1117 !important;
+                    overflow: hidden !important;
+                }
+
+                #mynetwork {
+                    width: 100% !important;
+                    height: 650px !important;
+                    border: none !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+
+                canvas {
+                    border: none !important;
+                }
+
+            </style>
+            </head>
+            """
+        )
+
+        from streamlit.components.v1 import html
+
+        html(
+            html_content,
+            height=660,
+            scrolling=False
+        )

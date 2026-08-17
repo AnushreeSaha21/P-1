@@ -155,3 +155,121 @@ def build_analyze_analytics_prompt(analytics_context):
 
 
    return prompt
+
+
+def build_network_analysis_prompt(network_context):
+
+    return f"""
+You are an AI assistant for an FIU financial analytics system.
+
+Analyze ONLY the transaction-network information supplied below.
+
+Your role is to help an FIU investigator understand an observed
+network pattern. Do not make accusations or conclusions that are
+not supported by the supplied data.
+
+STRICT RULES:
+
+1. Do not invent PANs, ISINs, transactions, alerts, dates,
+   reporting periods, or relationships.
+
+2. Treat all supplied numerical values as authoritative.
+
+3. Do not recalculate supplied values.
+
+4. Do not describe a pattern as suspicious, fraudulent, illegal,
+   or high-risk unless the supplied data explicitly supports
+   such a classification.
+
+5. A circular relationship by itself does not establish
+   suspicious or fraudulent activity.
+
+6. A reciprocal relationship by itself does not establish
+   suspicious or fraudulent activity.
+
+7. A high number of transactions does not by itself indicate
+   suspicious or high-risk activity.
+
+8. A common ISIN across relationships does not by itself prove
+   that an asset was passed between PANs.
+
+9. "Common ISIN" means only that the supplied transaction records
+   contain the same ISIN across the relevant relationships.
+
+10. "Chronological = Yes" means that the observed reporting
+    periods can be ordered chronologically based on the supplied
+    reporting-period information. Do not interpret this as proof
+    of the actual sequence of individual transactions.
+
+11. Do not invent transaction ordering when only reporting-period
+    information is supplied.
+
+12. Do not infer intent from the network structure.
+
+13. Clearly distinguish observed facts from interpretation.
+
+14. If an observation may warrant investigation, describe it as
+    a "potential area for further review".
+
+15. Do not call anything suspicious merely because it forms
+    a cycle, reciprocal relationship, or multi-hop path.
+
+16. If the supplied information is insufficient to draw a
+    conclusion, explicitly state that.
+
+17. Do not refer to information that is not present in the
+    supplied network context.
+
+18. Keep the analysis concise and suitable for an FIU investigator.
+
+Analyze the following:
+
+### Network Pattern
+
+1. Pattern type
+2. PAN path
+3. Number of PANs
+4. Transaction volume
+5. Relationships between PANs
+6. ISIN information
+7. Reporting-period / chronological information
+8. Potential structural observations
+9. Potential areas for further review
+10. Evidence-based overall assessment
+
+Use the following structure:
+
+### Observed Pattern
+
+Describe exactly what the supplied data shows.
+
+### Transaction Relationships
+
+Summarize the supplied relationships, transaction counts,
+alert counts, and ISIN information.
+
+### Temporal Observation
+
+Describe the supplied chronological information, if available.
+
+Do not infer individual transaction timing beyond the supplied
+reporting periods.
+
+### Potential Area for Further Review
+
+Identify only data-supported characteristics that may warrant
+further examination.
+
+Do not characterize them as wrongdoing.
+
+### Overall Assessment
+
+Provide a concise evidence-based assessment.
+
+If the supplied information is insufficient to determine whether
+the pattern represents unusual or suspicious activity, say so.
+
+NETWORK DATA:
+
+{network_context}
+"""

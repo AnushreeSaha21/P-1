@@ -12,7 +12,6 @@ from frontend.ui.upload import show_upload
 from ui.analytics import show_analytics
 from ui.database import show_database
 from ui.user_guide import show_user_guide
-from ui.graph import show_graph
 from ui.network_analysis import show_network_analysis
 
 
@@ -46,7 +45,6 @@ page = st.sidebar.radio(
         "Analytics",
         "Database",
         "About",
-        "Graph",
         "NW"
         
     ]
@@ -70,8 +68,6 @@ elif page == "Database":
 elif page == "About":
     show_user_guide()
 
-elif page == "Graph":
-    show_graph()
 elif page == "NW":
     show_network_analysis()
 

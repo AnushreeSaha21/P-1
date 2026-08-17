@@ -15,7 +15,8 @@ def get_pan_relationships(connection):
                 fiu_alert_type,
                 report_year,
                 report_month,
-                report_fortnight
+                report_fortnight,
+                isin_code
 
             FROM vw_alert_summary
 
