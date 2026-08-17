@@ -1038,10 +1038,47 @@ def find_pan_path(
         return None
 
     if source_pan == target_pan:
+
+        if not graph.has_edge(source_pan, target_pan):
+            return {
+                "path": [source_pan],
+                "hops": 0,
+                "relationships": []
+            }
+
+        edge_data = graph[
+            source_pan
+        ][
+            target_pan
+        ]
+
+        alerts = edge_data.get(
+            "alerts",
+            []
+        )
+
+        isins = sorted({
+            alert.get("isin_code")
+            for alert in alerts
+            if alert.get("isin_code")
+        })
+
         return {
             "path": [source_pan],
             "hops": 0,
-            "relationships": []
+            "relationships": [
+                {
+                    "source": source_pan,
+                    "target": target_pan,
+                    "transactions": edge_data.get(
+                        "transactions",
+                        0
+                    ),
+                    "alerts": len(alerts),
+                    "isins": isins
+                }
+            ],
+            "exceeds_limit": False
         }
 
     try:
