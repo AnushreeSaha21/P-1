@@ -4,13 +4,22 @@ import pandas as pd
 import tempfile
 
 from backend.network_analysis.network_service import (
-    build_analysis_graph,
+#     build_analysis_graph,
+#     find_transaction_cycles,
+     build_cycle_visualization,
+#     find_reciprocal_relationships,
+#     find_pan_path,
+#     find_pan_neighbors,
+     build_pan_visualization
+)
+
+from backend.network_analysis.neo4j_service import (
+    get_network_summary,
     find_transaction_cycles,
-    build_cycle_visualization,
     find_reciprocal_relationships,
-    find_pan_path,
+    find_self_loops,
     find_pan_neighbors,
-    build_pan_visualization
+    find_pan_path,
 )
 
 from backend.ai.ollama_service import (
@@ -78,7 +87,7 @@ def show_network_analysis():
     # BUILD NETWORK
     # =========================================================
 
-    analysis_graph = build_analysis_graph()
+    network_summary = get_network_summary()
 
     # =========================================================
     # NETWORK SUMMARY
@@ -90,19 +99,17 @@ def show_network_analysis():
 
     col1.metric(
         "PANs",
-        analysis_graph.number_of_nodes()
+        network_summary["pans"]
     )
 
     col2.metric(
         "Relationships",
-        analysis_graph.number_of_edges()
+        network_summary["relationships"]
     )
 
     col3.metric(
         "Connected Components",
-        nx.number_weakly_connected_components(
-            analysis_graph
-        )
+        "N/A"
     )
 
     st.divider()
@@ -136,7 +143,6 @@ def show_network_analysis():
         )
 
         cycles = find_transaction_cycles(
-            analysis_graph,
             max_cycle_length=5,
             limit=100
         )
@@ -594,7 +600,6 @@ def show_network_analysis():
                 ):
 
                     path_result = find_pan_path(
-                        analysis_graph,
                         source,
                         target,
                         max_hops=5
@@ -716,11 +721,8 @@ def show_network_analysis():
             "relationships in both directions."
         )
 
-        reciprocal_relationships = (
-            find_reciprocal_relationships(
-                analysis_graph,
-                limit=100
-            )
+        reciprocal_relationships = find_reciprocal_relationships(
+            limit=100
         )
 
         if not reciprocal_relationships:
@@ -928,7 +930,6 @@ def show_network_analysis():
                 ):
 
                     explorer_result = find_pan_neighbors(
-                        analysis_graph,
                         pan
                     )
 
@@ -1009,7 +1010,6 @@ def show_network_analysis():
             )
 
             network = build_pan_visualization(
-                analysis_graph,
                 pan
             )
 
@@ -1094,21 +1094,13 @@ def show_network_analysis():
 
                 for relationship in incoming:
 
-                    alerts = relationship.get(
-                        "alerts",
+                    alert_periods = relationship.get(
+                        "alert_periods",
                         []
                     )
 
                     reporting_periods = sorted(
-                        set(
-                            (
-                                f"{a.get('report_year')}-"
-                                f"{a.get('report_month')}-"
-                                f"{a.get('report_fortnight')}"
-                            )
-                            for a in alerts
-                            if a.get("report_year") is not None
-                        )
+                        set(alert_periods)
                     )
 
                     incoming_rows.append({
@@ -1123,7 +1115,10 @@ def show_network_analysis():
                             relationship["transactions"],
 
                         "Alerts":
-                            len(alerts),
+                            relationship.get(
+                                "alerts",
+                                0
+                            ),
 
                         "ISINs": (
                             ", ".join(
@@ -1178,21 +1173,9 @@ def show_network_analysis():
 
                 for relationship in outgoing:
 
-                    alerts = relationship.get(
-                        "alerts",
+                    reporting_periods = relationship.get(
+                        "alert_periods",
                         []
-                    )
-
-                    reporting_periods = sorted(
-                        set(
-                            (
-                                f"{a.get('report_year')}-"
-                                f"{a.get('report_month')}-"
-                                f"{a.get('report_fortnight')}"
-                            )
-                            for a in alerts
-                            if a.get("report_year") is not None
-                        )
                     )
 
                     outgoing_rows.append({
@@ -1207,7 +1190,10 @@ def show_network_analysis():
                             relationship["transactions"],
 
                         "Alerts":
-                            len(alerts),
+                            relationship.get(
+                                "alerts",
+                                0
+                            ),
 
                         "ISINs": (
                             ", ".join(
@@ -1260,23 +1246,27 @@ def show_network_analysis():
             # Self-loop
             # ---------------------------------------------------------
 
-            self_loop = analysis_graph.has_edge(
-                pan,
-                pan
-            )
+            self_loop = False
 
             self_loop_transactions = 0
 
-            if self_loop:
+            for relationship in (
+                explorer_result["incoming"]
+            ):
 
-                self_loop_transactions = analysis_graph[
-                    pan
-                ][
-                    pan
-                ].get(
-                    "transactions",
-                    0
-                )
+                if (
+                    relationship["source"] == pan
+                    and
+                    relationship["target"] == pan
+                ):
+
+                    self_loop = True
+
+                    self_loop_transactions = (
+                        relationship["transactions"]
+                    )
+
+                    break
 
 
             # ---------------------------------------------------------

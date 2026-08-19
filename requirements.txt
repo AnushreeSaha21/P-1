@@ -7,3 +7,5 @@ Pillow
 pyvis
 plotly
 ollama
+python-dotenv
+neo4j

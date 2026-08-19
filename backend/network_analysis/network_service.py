@@ -6,6 +6,10 @@ from backend.network_analysis.network_repository import (
     get_pan_relationships
 )
 
+from backend.network_analysis.neo4j_service import (
+    find_pan_neighbors
+)
+
 from pyvis.network import Network
 
 
@@ -511,121 +515,13 @@ def find_transaction_cycles(
 
     return cycles
 
-def find_pan_neighbors(
-    graph,
-    pan
-):
-    """
-    Return only the immediate incoming and outgoing
-    relationships for the supplied PAN.
-    """
+def build_pan_visualization(pan):
 
     pan = pan.strip().upper()
 
-    if pan not in graph:
+    explorer_result = find_pan_neighbors(pan)
 
-        return None
-
-    incoming = []
-    outgoing = []
-
-    # =========================================================
-    # INCOMING
-    # =========================================================
-
-    for source in graph.predecessors(pan):
-
-        data = graph[
-            source
-        ][
-            pan
-        ]
-
-        incoming.append({
-
-            "source": source,
-
-            "target": pan,
-
-            "transactions": data.get(
-                "transactions",
-                0
-            ),
-
-            "isins": data.get(
-                "isins",
-                []
-            ),
-
-            "alerts": data.get(
-                "alerts",
-                []
-            )
-
-        })
-
-    # =========================================================
-    # OUTGOING
-    # =========================================================
-
-    for target in graph.successors(pan):
-
-        data = graph[
-            pan
-        ][
-            target
-        ]
-
-        outgoing.append({
-
-            "source": pan,
-
-            "target": target,
-
-            "transactions": data.get(
-                "transactions",
-                0
-            ),
-
-            "isins": data.get(
-                "isins",
-                []
-            ),
-
-            "alerts": data.get(
-                "alerts",
-                []
-            )
-
-        })
-
-    return {
-
-        "pan": pan,
-
-        "incoming": incoming,
-
-        "outgoing": outgoing,
-
-        "total_connections": (
-            len(incoming)
-            +
-            len(outgoing)
-        )
-
-    }
-
-
-
-def build_pan_visualization(
-    graph,
-    pan
-):
-
-    pan = pan.strip().upper()
-
-    if pan not in graph:
-
+    if explorer_result is None:
         return None
 
     network = Network(
@@ -723,23 +619,23 @@ def build_pan_visualization(
     )
 
     # =========================================================
-    # INCOMING
+    # INCOMING RELATIONSHIPS
     # =========================================================
 
-    for source in graph.predecessors(pan):
+    for relationship in explorer_result.get(
+        "incoming",
+        []
+    ):
 
-        data = graph[
-            source
-        ][
-            pan
-        ]
+        source = relationship["source"]
+        target = relationship["target"]
 
-        transactions = data.get(
+        transactions = relationship.get(
             "transactions",
             0
         )
 
-        isins = data.get(
+        isins = relationship.get(
             "isins",
             []
         )
@@ -750,62 +646,52 @@ def build_pan_visualization(
             else "Not available"
         )
 
-        alerts = data.get(
-            "alerts",
+        alert_periods = relationship.get(
+            "alert_periods",
             []
         )
 
-        alert_periods = []
-
-        for alert in alerts:
-
-            year = alert.get("report_year")
-            month = alert.get("report_month")
-            fortnight = alert.get("report_fortnight")
-
-            if (
-                year is not None
-                and month is not None
-                and fortnight is not None
-            ):
-
-                alert_periods.append(
-                    f"{year}-{month:02d} - "
-                    f"{fortnight} Fortnight"
-                )
-
-        alert_periods = sorted(
-            set(alert_periods)
-        )
-
         period_text = (
-            "\n".join(alert_periods)
+            "\n".join(
+                alert_periods
+            )
             if alert_periods
             else "Not available"
         )
 
-        network.add_node(
-            source,
-            label=source,
-            color={
-                "background": "#8AB4F8",
-                "border": "#6EA8FE"
-            }
-        )
+        # -----------------------------------------------------
+        # Neighbor node
+        # -----------------------------------------------------
+
+        if source != pan:
+
+            network.add_node(
+                source,
+                label=source,
+                color={
+                    "background": "#8AB4F8",
+                    "border": "#6EA8FE"
+                }
+            )
+
+        # -----------------------------------------------------
+        # Edge
+        # -----------------------------------------------------
 
         network.add_edge(
 
             source,
 
-            pan,
+            target,
 
             label=f"{transactions} txn",
 
             title=(
-                f"{source} → {pan}\n"
-                f"Transactions: {transactions}\n"
-                f"ISINs: {isin_text}\n"
-                f"Alert Periods:\n{period_text}"
+                f"{source} → {target}<br>"
+                f"Transactions: {transactions}<br>"
+                f"ISINs: {isin_text}<br>"
+                f"Alert Periods:<br>"
+                f"{period_text.replace(chr(10), '<br>')}"
             ),
 
             arrows="to",
@@ -816,27 +702,26 @@ def build_pan_visualization(
                 "face": "Arial",
                 "strokeWidth": 0
             }
-
         )
 
     # =========================================================
-    # OUTGOING
+    # OUTGOING RELATIONSHIPS
     # =========================================================
 
-    for target in graph.successors(pan):
+    for relationship in explorer_result.get(
+        "outgoing",
+        []
+    ):
 
-        data = graph[
-            pan
-        ][
-            target
-        ]
+        source = relationship["source"]
+        target = relationship["target"]
 
-        transactions = data.get(
+        transactions = relationship.get(
             "transactions",
             0
         )
 
-        isins = data.get(
+        isins = relationship.get(
             "isins",
             []
         )
@@ -847,62 +732,52 @@ def build_pan_visualization(
             else "Not available"
         )
 
-        alerts = data.get(
-            "alerts",
+        alert_periods = relationship.get(
+            "alert_periods",
             []
         )
 
-        alert_periods = []
-
-        for alert in alerts:
-
-            year = alert.get("report_year")
-            month = alert.get("report_month")
-            fortnight = alert.get("report_fortnight")
-
-            if (
-                year is not None
-                and month is not None
-                and fortnight is not None
-            ):
-
-                alert_periods.append(
-                    f"{year}-{month:02d} - "
-                    f"{fortnight} Fortnight"
-                )
-
-        alert_periods = sorted(
-            set(alert_periods)
-        )
-
         period_text = (
-            "\n".join(alert_periods)
+            "\n".join(
+                alert_periods
+            )
             if alert_periods
             else "Not available"
         )
 
-        network.add_node(
-            target,
-            label=target,
-            color={
-                "background": "#8AB4F8",
-                "border": "#6EA8FE"
-            }
-        )
+        # -----------------------------------------------------
+        # Neighbor node
+        # -----------------------------------------------------
+
+        if target != pan:
+
+            network.add_node(
+                target,
+                label=target,
+                color={
+                    "background": "#8AB4F8",
+                    "border": "#6EA8FE"
+                }
+            )
+
+        # -----------------------------------------------------
+        # Edge
+        # -----------------------------------------------------
 
         network.add_edge(
 
-            pan,
+            source,
 
             target,
 
             label=f"{transactions} txn",
 
             title=(
-                f"{pan} → {target}\n"
-                f"Transactions: {transactions}\n"
-                f"ISINs: {isin_text}\n"
-                f"Alert Periods:\n{period_text}"
+                f"{source} → {target}<br>"
+                f"Transactions: {transactions}<br>"
+                f"ISINs: {isin_text}<br>"
+                f"Alert Periods:<br>"
+                f"{period_text.replace(chr(10), '<br>')}"
             ),
 
             arrows="to",
@@ -913,7 +788,6 @@ def build_pan_visualization(
                 "face": "Arial",
                 "strokeWidth": 0
             }
-
         )
 
     return network
