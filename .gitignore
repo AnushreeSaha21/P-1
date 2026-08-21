@@ -93,7 +93,7 @@ tmp/
 # Password / Config
 # =====================================================
 
-backend/database/config.py
+# backend/database/config.py
 
 # =====================================================
 # Misc.
