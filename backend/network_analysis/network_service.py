@@ -98,15 +98,25 @@ def build_cycle_visualization(graph):
             0
         )
 
-        alerts = data.get(
-            "alerts",
+        # ---------------------------------------------------------
+        # ISINs
+        # ---------------------------------------------------------
+
+        isins = data.get(
+            "isins",
             []
         )
 
+        if not isinstance(isins, list):
+            isins = [isins]
+
         isins = sorted({
-            alert.get("isin_code")
-            for alert in alerts
-            if alert.get("isin_code")
+            str(isin).strip().upper()
+            for isin in isins
+            if isin
+            and str(isin).strip()
+            and str(isin).strip().lower()
+                not in ["nan", "none", "null"]
         })
 
         isin_text = (
@@ -115,28 +125,27 @@ def build_cycle_visualization(graph):
             else "Not available"
         )
 
-        alert_periods = []
+        # ---------------------------------------------------------
+        # Alert Periods
+        # ---------------------------------------------------------
 
-        for alert in alerts:
-
-            year = alert.get("report_year")
-            month = alert.get("report_month")
-            fortnight = alert.get("report_fortnight")
-
-            if (
-                year is not None
-                and month is not None
-                and fortnight is not None
-            ):
-
-                alert_periods.append(
-                    f"{year}-{month:02d} - "
-                    f"{fortnight} Fortnight"
-                )
-
-        alert_periods = sorted(
-            set(alert_periods)
+        alert_periods = data.get(
+            "alert_periods",
+            []
         )
+
+        if not isinstance(
+            alert_periods,
+            list
+        ):
+            alert_periods = [alert_periods]
+
+        alert_periods = sorted({
+            str(period).strip()
+            for period in alert_periods
+            if period
+            and str(period).strip()
+        })
 
         period_text = (
             "\n".join(alert_periods)
@@ -687,11 +696,11 @@ def build_pan_visualization(pan):
             label=f"{transactions} txn",
 
             title=(
-                f"{source} → {target}<br>"
-                f"Transactions: {transactions}<br>"
-                f"ISINs: {isin_text}<br>"
-                f"Alert Periods:<br>"
-                f"{period_text.replace(chr(10), '<br>')}"
+                f"{source} → {target}\n"
+                f"Transactions: {transactions}\n"
+                f"ISINs: {isin_text}\n"
+                f"Alert Periods:\n"
+                f"{period_text.replace(chr(10), '\n')}"
             ),
 
             arrows="to",
@@ -773,11 +782,11 @@ def build_pan_visualization(pan):
             label=f"{transactions} txn",
 
             title=(
-                f"{source} → {target}<br>"
-                f"Transactions: {transactions}<br>"
-                f"ISINs: {isin_text}<br>"
-                f"Alert Periods:<br>"
-                f"{period_text.replace(chr(10), '<br>')}"
+                f"{source} → {target}\n"
+                f"Transactions: {transactions}\n"
+                f"ISINs: {isin_text}\n"
+                f"Alert Periods:\n"
+                f"{period_text.replace(chr(10), '\n')}"
             ),
 
             arrows="to",

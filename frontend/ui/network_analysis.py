@@ -4,12 +4,7 @@ import pandas as pd
 import tempfile
 
 from backend.network_analysis.network_service import (
-#     build_analysis_graph,
-#     find_transaction_cycles,
      build_cycle_visualization,
-#     find_reciprocal_relationships,
-#     find_pan_path,
-#     find_pan_neighbors,
      build_pan_visualization
 )
 
@@ -291,19 +286,28 @@ def show_network_analysis():
                 for relationship in relationships:
 
                     cycle_graph.add_edge(
-
                         relationship["source"],
-
                         relationship["target"],
 
-                        transactions=relationship[
-                            "transactions"
-                        ],
+                        transactions=relationship.get(
+                            "transactions",
+                            0
+                        ),
 
-                        alerts=relationship[
-                            "alerts"
-                        ]
+                        alerts=relationship.get(
+                            "alerts",
+                            0
+                        ),
 
+                        isins=relationship.get(
+                            "isins",
+                            []
+                        ),
+
+                        alert_periods=relationship.get(
+                            "alert_periods",
+                            []
+                        )
                     )
 
                 st.session_state.selected_cycle_graph = (
@@ -630,7 +634,7 @@ def show_network_analysis():
 
                         st.info(
                             f"The source and target are the same PAN: "
-                            f"{source}. This represents a self-loop query."
+                            f"{source}. The search identifies paths that return to the originating PAN, either directly or through one or more intermediate PANs."
                         )
 
                     else:
@@ -654,7 +658,7 @@ def show_network_analysis():
 
                     col1.metric(
                         "PANs Involved",
-                        len(path)
+                        len(set(path))
                     )
 
                     col2.metric(
